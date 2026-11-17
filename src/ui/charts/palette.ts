@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 /**
  * Validated categorical palette (fixed order, never cycled), stepped per color scheme.
@@ -44,6 +45,7 @@ const DARK_QUERY = '(prefers-color-scheme: dark)';
 
 export function useChartPalette(): ChartPalette {
   const [isDark, setIsDark] = useState(() => matchesDark());
+  const [isPrinting, setIsPrinting] = useState(false);
 
   useEffect(() => {
     if (typeof window.matchMedia !== 'function') return;
@@ -53,7 +55,19 @@ export function useChartPalette(): ChartPalette {
     return () => query.removeEventListener('change', onChange);
   }, []);
 
-  return PALETTES[isDark ? 'dark' : 'light'];
+  useEffect(() => {
+    // The charts must be repainted in light colors before the page is printed.
+    const onBeforePrint = () => flushSync(() => setIsPrinting(true));
+    const onAfterPrint = () => setIsPrinting(false);
+    window.addEventListener('beforeprint', onBeforePrint);
+    window.addEventListener('afterprint', onAfterPrint);
+    return () => {
+      window.removeEventListener('beforeprint', onBeforePrint);
+      window.removeEventListener('afterprint', onAfterPrint);
+    };
+  }, []);
+
+  return PALETTES[isDark && !isPrinting ? 'dark' : 'light'];
 }
 
 function matchesDark(): boolean {

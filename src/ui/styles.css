@@ -17,7 +17,8 @@
   line-height: 1.5;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Paper is white: the dark theme only applies on screen. */
+@media screen and (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
     --page: #0d0d0d;
@@ -243,7 +244,6 @@ button:disabled {
   color: var(--negative);
 }
 
-/* Breakdowns */
 /* Cotisations */
 
 .members {
@@ -258,6 +258,7 @@ button:disabled {
   padding: 2px 0;
 }
 
+/* Breakdowns */
 
 .breakdown {
   display: grid;
@@ -311,5 +312,20 @@ button:disabled {
 
   .card {
     break-inside: avoid;
+  }
+
+  .breakdown {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  /* Charts are drawn at screen width: scale them down to fit the page. */
+  .recharts-wrapper {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .recharts-surface {
+    max-width: 100%;
+    height: auto;
   }
 }

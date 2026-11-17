@@ -1,4 +1,4 @@
-import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import type { GroupedCommand } from '../../domain/FinancialSummary';
 import { useChartPalette } from '../charts/palette';
 import { formatAmount, formatSignedAmount } from '../format';
@@ -46,10 +46,6 @@ function CommandChart({ command, maxAmount }: { command: GroupedCommand; maxAmou
             tick={{ fill: palette.text, fontSize: 13 }}
           />
           <YAxis hide domain={[0, maxAmount || 1]} />
-          <Tooltip
-            cursor={{ fill: 'transparent' }}
-            formatter={(value) => [formatAmount(Number(value), locale)]}
-          />
           <Bar dataKey="value" radius={[4, 4, 0, 0]} isAnimationActive={false}>
             {bars.map((bar) => (
               <Cell key={bar.name} fill={bar.color} />

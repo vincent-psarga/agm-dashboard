@@ -1,4 +1,5 @@
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from 'recharts';
+import type { PieLabelRenderProps } from 'recharts';
 import type { CategoryBreakdown } from '../../domain/FinancialSummary';
 import { useChartPalette } from '../charts/palette';
 import { formatAmount, formatPercent } from '../format';
@@ -73,20 +74,19 @@ export function BreakdownSection({ id, title, breakdown }: Props) {
                 data={slices}
                 dataKey="value"
                 nameKey="name"
-                outerRadius="80%"
+                outerRadius="70%"
                 stroke={palette.surface}
                 strokeWidth={2}
                 isAnimationActive={false}
+                label={(props: PieLabelRenderProps) => (
+                  <PercentLabel {...props} locale={locale} color={palette.text} />
+                )}
+                labelLine={{ stroke: palette.axis }}
               >
                 {slices.map((slice) => (
                   <Cell key={slice.name} fill={slice.color} />
                 ))}
               </Pie>
-              <Tooltip
-                formatter={(value) => [
-                  `${formatAmount(Number(value), locale)} (${formatPercent(Number(value) / breakdown.total, locale)})`,
-                ]}
-              />
               <Legend
                 iconType="circle"
                 itemSorter={null}
@@ -97,5 +97,29 @@ export function BreakdownSection({ id, title, breakdown }: Props) {
         </figure>
       </div>
     </section>
+  );
+}
+
+/** Percentage shown next to each slice, so it stays readable once printed. */
+function PercentLabel({
+  x,
+  y,
+  textAnchor,
+  percent,
+  locale,
+  color,
+}: PieLabelRenderProps & { locale: string; color: string }) {
+  return (
+    <text
+      x={x}
+      y={y}
+      textAnchor={textAnchor}
+      dominantBaseline="central"
+      fill={color}
+      fontSize={13}
+      fontWeight={600}
+    >
+      {formatPercent(percent ?? 0, locale)}
+    </text>
   );
 }
