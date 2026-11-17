@@ -52,7 +52,11 @@ describe('App', () => {
     expect(within(balance).getByRole('row', { name: /Balance on 20 December 2025/ })).toHaveTextContent('-€100.00');
 
     const cotisations = screen.getByRole('region', { name: 'Membership fees' });
-    expect(within(cotisations).getByText('Cotisation Alice')).toBeInTheDocument();
+    expect(within(cotisations).getAllByRole('listitem').map((item) => item.textContent)).toEqual([
+      'Cotisation Alice',
+    ]);
+    expect(within(cotisations).getByRole('row', { name: /Number of membership fees/ })).toHaveTextContent('1');
+    expect(within(cotisations).getByRole('row', { name: /Total/ })).toHaveTextContent('€30.00');
 
     const expenses = screen.getByRole('region', { name: 'Expenses' });
     const expenseRows = within(expenses).getAllByRole('row').map((row) => row.textContent);

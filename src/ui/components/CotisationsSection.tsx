@@ -1,6 +1,6 @@
 import type { Movement } from '../../domain/Movement';
 import { useI18n } from '../i18n/I18nProvider';
-import { formatAmount, formatDate } from '../format';
+import { formatAmount } from '../format';
 
 export function CotisationsSection({ cotisations, total }: { cotisations: Movement[]; total: number }) {
   const { t, locale } = useI18n();
@@ -12,39 +12,22 @@ export function CotisationsSection({ cotisations, total }: { cotisations: Moveme
         <p className="muted">{t('cotisationsEmpty')}</p>
       ) : (
         <>
-          <p className="muted">
-            {t('cotisationsCount', {
-              count: cotisations.length,
-              total: formatAmount(total, locale),
-            })}
-          </p>
+          <ul className="members">
+            {cotisations.map((cotisation, index) => (
+              <li key={index}>{cotisation.description}</li>
+            ))}
+          </ul>
           <table className="data-table">
-            <thead>
-              <tr>
-                <th scope="col">{t('date')}</th>
-                <th scope="col">{t('description')}</th>
-                <th scope="col" className="amount">
-                  {t('amount')}
-                </th>
-              </tr>
-            </thead>
             <tbody>
-              {cotisations.map((cotisation, index) => (
-                <tr key={index}>
-                  <td>{formatDate(cotisation.date, locale, 'short')}</td>
-                  <td>{cotisation.description}</td>
-                  <td className="amount">{formatAmount(cotisation.credit, locale)}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
+              <tr>
+                <th scope="row">{t('cotisationsCount')}</th>
+                <td className="amount">{cotisations.length}</td>
+              </tr>
               <tr className="total-row">
-                <th scope="row" colSpan={2}>
-                  {t('total')}
-                </th>
+                <th scope="row">{t('total')}</th>
                 <td className="amount">{formatAmount(total, locale)}</td>
               </tr>
-            </tfoot>
+            </tbody>
           </table>
         </>
       )}
