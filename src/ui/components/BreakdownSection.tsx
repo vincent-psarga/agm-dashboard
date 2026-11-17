@@ -1,9 +1,12 @@
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
+import { Cell, Pie, PieChart } from 'recharts';
 import type { PieLabelRenderProps } from 'recharts';
 import type { CategoryBreakdown } from '../../domain/FinancialSummary';
 import { useChartPalette } from '../charts/palette';
 import { formatAmount, formatPercent } from '../format';
 import { useI18n } from '../i18n/I18nProvider';
+
+const PIE_WIDTH = 460;
+const PIE_HEIGHT = 300;
 
 interface Props {
   id: string;
@@ -68,27 +71,29 @@ export function BreakdownSection({ id, title, breakdown }: Props) {
         </table>
 
         <figure className="chart" aria-label={t('chartLabel', { title: title.toLowerCase() })}>
-          <ResponsiveContainer width="100%" height={320}>
-            <PieChart>
-              <Pie
-                data={slices}
-                dataKey="value"
-                nameKey="name"
-                outerRadius="62%"
-                stroke={palette.surface}
-                strokeWidth={2}
-                isAnimationActive={false}
-                label={(props: PieLabelRenderProps) => (
-                  <SliceLabel {...props} locale={locale} color={palette.text} />
-                )}
-                labelLine={{ stroke: palette.axis }}
-              >
-                {slices.map((slice) => (
-                  <Cell key={slice.name} fill={slice.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+          {/*
+            Drawn at a fixed size then scaled to the column by CSS: the labels shrink
+            with the pie instead of being cut when the column is narrow (e.g. printed).
+          */}
+          <PieChart width={PIE_WIDTH} height={PIE_HEIGHT}>
+            <Pie
+              data={slices}
+              dataKey="value"
+              nameKey="name"
+              outerRadius="62%"
+              stroke={palette.surface}
+              strokeWidth={2}
+              isAnimationActive={false}
+              label={(props: PieLabelRenderProps) => (
+                <SliceLabel {...props} locale={locale} color={palette.text} />
+              )}
+              labelLine={{ stroke: palette.axis }}
+            >
+              {slices.map((slice) => (
+                <Cell key={slice.name} fill={slice.color} />
+              ))}
+            </Pie>
+          </PieChart>
         </figure>
       </div>
     </section>
