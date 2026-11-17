@@ -264,6 +264,11 @@ button:disabled {
   min-width: 0;
 }
 
+/* Long category names next to the slices may go past the chart edges. */
+.chart .recharts-surface {
+  overflow: visible;
+}
+
 /* Grouped commands */
 
 .commands {
@@ -302,18 +307,35 @@ button:disabled {
     break-inside: avoid;
   }
 
+  /* Table above the pie chart: the chart needs the page width for its labels. */
   .breakdown {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  /* Charts are drawn at screen width: scale them down to fit the page. */
+  .chart {
+    break-inside: avoid;
+  }
+
+  /*
+   * Charts are drawn at screen width: scale them down to fit the page.
+   * Recharts wraps each chart in a 0px-wide div, which must take the full width
+   * first, otherwise the percentages below resolve to 0 and the charts vanish.
+   */
+  .recharts-responsive-container {
+    height: auto !important;
+  }
+
+  .recharts-responsive-container > div {
+    width: 100% !important;
+  }
+
   .recharts-wrapper {
     max-width: 100% !important;
     height: auto !important;
   }
 
   .recharts-surface {
-    max-width: 100%;
+    width: 100%;
     height: auto;
   }
 }
