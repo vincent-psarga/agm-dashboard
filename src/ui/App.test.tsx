@@ -68,6 +68,7 @@ describe('App', () => {
     ]);
 
     const commands = screen.getByRole('region', { name: 'Grouped orders' });
+    expect(within(commands).queryByText(/cmd:/)).not.toBeInTheDocument();
     expect(within(commands).getByRole('article', { name: 'sword' })).toHaveTextContent(
       'Difference: -€150.00',
     );

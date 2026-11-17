@@ -15,14 +15,11 @@ export function CommandsSection({ commands }: { commands: GroupedCommand[] }) {
       {commands.length === 0 ? (
         <p className="muted">{t('commandsEmpty')}</p>
       ) : (
-        <>
-          <p className="muted">{t('commandsHelp')}</p>
-          <div className="commands">
-            {commands.map((command) => (
-              <CommandChart key={command.key} command={command} maxAmount={maxAmount} />
-            ))}
-          </div>
-        </>
+        <div className="commands">
+          {commands.map((command) => (
+            <CommandChart key={command.key} command={command} maxAmount={maxAmount} />
+          ))}
+        </div>
       )}
     </section>
   );
