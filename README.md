@@ -20,6 +20,10 @@ When the file has several sheets, the first one with these columns is used:
 | Tag         | `cmd:<key>` groups the row in the "grouped orders" section   |
 | Solde       | balance after the movement, used for the initial/final balance |
 
+When the file covers several school years (1st of September to 31st of August), a selector lets
+you pick the year to present; the most recent one is shown first, and the whole period is also
+available.
+
 A sample file is available in [`public/sample-movements.xlsx`](public/sample-movements.xlsx)
 (regenerate it with `npm run fixture`), and from the "Try with a sample file" link in the app.
 

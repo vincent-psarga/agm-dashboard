@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import { LoadFinancialSummary } from '../application/LoadFinancialSummary';
+import { LoadMovements } from '../application/LoadMovements';
 import type { SheetRows } from '../domain/SpreadsheetReader';
 import { App } from './App';
 import { I18nProvider } from './i18n/I18nProvider';
@@ -12,14 +12,23 @@ const ROWS: SheetRows = [
   ['05/01/2025', 'Cotisation Alice', '', null, 30, 'Cotisation', null, 130],
   ['10/02/2025', 'Achat épées', '', 450, null, 'Commande', 'cmd:sword', -320],
   ['12/02/2025', 'Remboursement épée', '', null, 300, 'Commande', 'cmd:sword', -20],
-  ['20/12/2025', 'Location salle', '', 80, null, 'Location', null, -100],
+  ['20/06/2025', 'Location salle', '', 80, null, 'Location', null, -100],
+];
+
+/** Two school years: 2023-2024 and 2024-2025. */
+const TWO_YEARS_ROWS: SheetRows = [
+  ['Date', 'Description', 'Type', 'Débit', 'Crédit', 'Raison', 'Tag', 'Solde'],
+  ['15/09/2023', 'Cotisation Zoé', '', null, 25, 'Cotisation', null, 525],
+  ['10/03/2024', 'Assurance', '', 200, null, 'Assurance', null, 325],
+  ['15/09/2024', 'Cotisation Alice', '', null, 30, 'Cotisation', null, 355],
+  ['01/06/2025', 'Location salle', '', 80, null, 'Location', null, 275],
 ];
 
 function renderApp({ rows = ROWS, language = 'en' }: { rows?: SheetRows; language?: Language } = {}) {
-  const loadSummary = new LoadFinancialSummary({ read: async () => [{ name: 'Sheet1', rows }] });
+  const loadMovements = new LoadMovements({ read: async () => [{ name: 'Sheet1', rows }] });
   render(
     <I18nProvider initialLanguage={language}>
-      <App loadSummary={loadSummary} />
+      <App loadMovements={loadMovements} />
     </I18nProvider>,
   );
 }
@@ -42,14 +51,13 @@ describe('App', () => {
     await uploadFile();
 
     expect(
-      await screen.findByRole('heading', {
-        name: 'Financial year from 5 January 2025 to 20 December 2025',
-      }),
+      await screen.findByRole('heading', { name: 'School year 2024-2025' }),
     ).toBeInTheDocument();
+    expect(screen.getByText('Movements from 5 January 2025 to 20 June 2025')).toBeInTheDocument();
 
     const balance = screen.getByRole('region', { name: 'Account balance' });
     expect(within(balance).getByRole('row', { name: /Balance on 5 January 2025/ })).toHaveTextContent('€100.00');
-    expect(within(balance).getByRole('row', { name: /Balance on 20 December 2025/ })).toHaveTextContent('-€100.00');
+    expect(within(balance).getByRole('row', { name: /Balance on 20 June 2025/ })).toHaveTextContent('-€100.00');
 
     const cotisations = screen.getByRole('region', { name: 'Membership fees' });
     const [, firstMember] = within(cotisations).getAllByRole('row');
@@ -85,13 +93,65 @@ describe('App', () => {
     expect(screen.queryByRole('region', { name: 'Grouped orders' })).not.toBeInTheDocument();
   });
 
+  describe('when the file covers several school years', () => {
+    it('shows the most recent school year first', async () => {
+      renderApp({ rows: TWO_YEARS_ROWS });
+
+      await uploadFile();
+
+      expect(await screen.findByRole('heading', { name: 'School year 2024-2025' })).toBeInTheDocument();
+      const balance = screen.getByRole('region', { name: 'Account balance' });
+      expect(within(balance).getByRole('row', { name: /Balance on 15 September 2024/ })).toHaveTextContent('€325.00');
+      expect(within(balance).getByRole('row', { name: /Balance on 1 June 2025/ })).toHaveTextContent('€275.00');
+      const cotisations = screen.getByRole('region', { name: 'Membership fees' });
+      expect(within(cotisations).getByText('Alice')).toBeInTheDocument();
+      expect(within(cotisations).queryByText('Zoé')).not.toBeInTheDocument();
+    });
+
+    it('shows the selected school year', async () => {
+      renderApp({ rows: TWO_YEARS_ROWS });
+      await uploadFile();
+
+      await userEvent.selectOptions(await screen.findByLabelText('School year'), '2023-2024');
+
+      expect(screen.getByRole('heading', { name: 'School year 2023-2024' })).toBeInTheDocument();
+      const cotisations = screen.getByRole('region', { name: 'Membership fees' });
+      expect(within(cotisations).getByText('Zoé')).toBeInTheDocument();
+      expect(within(cotisations).queryByText('Alice')).not.toBeInTheDocument();
+      const expenses = screen.getByRole('region', { name: 'Expenses' });
+      expect(within(expenses).getByRole('row', { name: /Total/ })).toHaveTextContent('€200.00');
+    });
+
+    it('can show the whole period of the file', async () => {
+      renderApp({ rows: TWO_YEARS_ROWS });
+      await uploadFile();
+
+      await userEvent.selectOptions(await screen.findByLabelText('School year'), 'Whole period');
+
+      expect(
+        screen.getByRole('heading', { name: 'Financial year from 15 September 2023 to 1 June 2025' }),
+      ).toBeInTheDocument();
+      const balance = screen.getByRole('region', { name: 'Account balance' });
+      expect(within(balance).getByRole('row', { name: /Balance on 15 September 2023/ })).toHaveTextContent('€500.00');
+    });
+  });
+
+  it('does not offer to select a school year when the file covers only one', async () => {
+    renderApp();
+
+    await uploadFile();
+
+    await screen.findByRole('heading', { name: 'School year 2024-2025' });
+    expect(screen.queryByLabelText('School year')).not.toBeInTheDocument();
+  });
+
   it('can be displayed in French', async () => {
     renderApp({ language: 'fr' });
 
     await userEvent.upload(screen.getByLabelText('Choisir un fichier Excel'), new File([''], 'a.xlsx'));
 
     expect(
-      await screen.findByRole('heading', { name: 'Exercice du 5 janvier 2025 au 20 décembre 2025' }),
+      await screen.findByRole('heading', { name: 'Année scolaire 2024-2025' }),
     ).toBeInTheDocument();
   });
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { LoadFinancialSummary } from '../application/LoadFinancialSummary';
-import type { FinancialSummary } from '../domain/FinancialSummary';
+import type { LoadMovements } from '../application/LoadMovements';
+import type { Movement } from '../domain/Movement';
 import { MovementsFileError } from '../domain/MovementsFileError';
 import { Dashboard } from './components/Dashboard';
 import { FileUpload } from './components/FileUpload';
@@ -12,16 +12,16 @@ type State =
   | { status: 'idle' }
   | { status: 'loading' }
   | { status: 'error'; error: unknown }
-  | { status: 'ready'; summary: FinancialSummary };
+  | { status: 'ready'; movements: Movement[] };
 
-export function App({ loadSummary }: { loadSummary: LoadFinancialSummary }) {
+export function App({ loadMovements }: { loadMovements: LoadMovements }) {
   const { t } = useI18n();
   const [state, setState] = useState<State>({ status: 'idle' });
 
   const onFile = async (file: Blob) => {
     setState({ status: 'loading' });
     try {
-      setState({ status: 'ready', summary: await loadSummary.execute(file) });
+      setState({ status: 'ready', movements: await loadMovements.execute(file) });
     } catch (error) {
       setState({ status: 'error', error });
     }
@@ -46,7 +46,7 @@ export function App({ loadSummary }: { loadSummary: LoadFinancialSummary }) {
 
       <main>
         {state.status === 'ready' ? (
-          <Dashboard summary={state.summary} />
+          <Dashboard movements={state.movements} />
         ) : (
           <FileUpload
             onFile={onFile}

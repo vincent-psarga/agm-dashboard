@@ -1,20 +1,19 @@
-import type { FinancialSummary } from '../domain/FinancialSummary';
+import type { Movement } from '../domain/Movement';
 import { MovementsFileError } from '../domain/MovementsFileError';
 import type { Sheet, SpreadsheetReader } from '../domain/SpreadsheetReader';
-import { computeSummary } from './computeSummary';
 import { parseMovements } from './parseMovements';
 
-/** Use case: turns the uploaded bank export into the summary shown during the meeting. */
-export class LoadFinancialSummary {
+/** Use case: reads the movements of the uploaded bank export. */
+export class LoadMovements {
   constructor(private readonly reader: SpreadsheetReader) {}
 
-  async execute(file: Blob): Promise<FinancialSummary> {
+  async execute(file: Blob): Promise<Movement[]> {
     let sheets: Sheet[];
     try {
       sheets = await this.reader.read(file);
     } catch {
       throw new MovementsFileError('unreadableFile');
     }
-    return computeSummary(parseMovements(sheets));
+    return parseMovements(sheets);
   }
 }

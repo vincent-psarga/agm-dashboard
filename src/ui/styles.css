@@ -101,9 +101,37 @@ h3 {
   margin-bottom: 20px;
 }
 
-.dashboard .period {
-  font-size: 1.4rem;
+.period {
   margin-bottom: 20px;
+}
+
+.period h2 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.period p {
+  margin: 4px 0 0;
+}
+
+.school-year-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.school-year-selector label {
+  font-weight: 600;
+}
+
+.school-year-selector select {
+  font: inherit;
+  color: var(--text-primary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
 }
 
 /* Upload */
