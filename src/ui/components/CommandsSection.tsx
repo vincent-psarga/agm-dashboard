@@ -9,18 +9,17 @@ export function CommandsSection({ commands }: { commands: GroupedCommand[] }) {
   // All the charts share the same scale so that the orders can be compared.
   const maxAmount = Math.max(0, ...commands.flatMap((command) => [command.expenses, command.incomes]));
 
+  // Not every association runs grouped orders: the section is only shown when there are some.
+  if (commands.length === 0) return null;
+
   return (
     <section className="card" aria-labelledby="commands-title">
       <h2 id="commands-title">{t('commandsTitle')}</h2>
-      {commands.length === 0 ? (
-        <p className="muted">{t('commandsEmpty')}</p>
-      ) : (
-        <div className="commands">
-          {commands.map((command) => (
-            <CommandChart key={command.key} command={command} maxAmount={maxAmount} />
-          ))}
-        </div>
-      )}
+      <div className="commands">
+        {commands.map((command) => (
+          <CommandChart key={command.key} command={command} maxAmount={maxAmount} />
+        ))}
+      </div>
     </section>
   );
 }

@@ -76,6 +76,15 @@ describe('App', () => {
     );
   });
 
+  it('does not show the grouped orders section when no movement is tagged "cmd:..."', async () => {
+    renderApp({ rows: ROWS.map((row) => row.map((cell) => (cell === 'cmd:sword' ? null : cell))) });
+
+    await uploadFile();
+
+    expect(await screen.findByRole('region', { name: 'Expenses' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Grouped orders' })).not.toBeInTheDocument();
+  });
+
   it('can be displayed in French', async () => {
     renderApp({ language: 'fr' });
 
