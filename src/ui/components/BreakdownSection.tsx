@@ -1,4 +1,4 @@
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from 'recharts';
+import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
 import type { PieLabelRenderProps } from 'recharts';
 import type { CategoryBreakdown } from '../../domain/FinancialSummary';
 import { useChartPalette } from '../charts/palette';
@@ -74,12 +74,12 @@ export function BreakdownSection({ id, title, breakdown }: Props) {
                 data={slices}
                 dataKey="value"
                 nameKey="name"
-                outerRadius="70%"
+                outerRadius="62%"
                 stroke={palette.surface}
                 strokeWidth={2}
                 isAnimationActive={false}
                 label={(props: PieLabelRenderProps) => (
-                  <PercentLabel {...props} locale={locale} color={palette.text} />
+                  <SliceLabel {...props} locale={locale} color={palette.text} />
                 )}
                 labelLine={{ stroke: palette.axis }}
               >
@@ -87,11 +87,6 @@ export function BreakdownSection({ id, title, breakdown }: Props) {
                   <Cell key={slice.name} fill={slice.color} />
                 ))}
               </Pie>
-              <Legend
-                iconType="circle"
-                itemSorter={null}
-                formatter={(value) => <span className="legend-label">{value}</span>}
-              />
             </PieChart>
           </ResponsiveContainer>
         </figure>
@@ -100,26 +95,27 @@ export function BreakdownSection({ id, title, breakdown }: Props) {
   );
 }
 
-/** Percentage shown next to each slice, so it stays readable once printed. */
-function PercentLabel({
+/**
+ * Category name and percentage written next to each slice: the chart can be read
+ * without matching colors (color-blind readers, black and white prints).
+ */
+function SliceLabel({
   x,
   y,
   textAnchor,
+  name,
   percent,
   locale,
   color,
 }: PieLabelRenderProps & { locale: string; color: string }) {
   return (
-    <text
-      x={x}
-      y={y}
-      textAnchor={textAnchor}
-      dominantBaseline="central"
-      fill={color}
-      fontSize={13}
-      fontWeight={600}
-    >
-      {formatPercent(percent ?? 0, locale)}
+    <text x={x} y={y} textAnchor={textAnchor} fill={color} fontSize={13}>
+      <tspan x={x} dy="-0.2em">
+        {name}
+      </tspan>
+      <tspan x={x} dy="1.2em" fontWeight={600}>
+        {formatPercent(percent ?? 0, locale)}
+      </tspan>
     </text>
   );
 }

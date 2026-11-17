@@ -272,10 +272,6 @@ button:disabled {
   min-width: 0;
 }
 
-.legend-label {
-  color: var(--text-primary);
-}
-
 /* Grouped commands */
 
 .commands {
