@@ -1,8 +1,8 @@
-import type { Movement } from '../../domain/Movement';
+import type { Cotisation } from '../../domain/FinancialSummary';
 import { useI18n } from '../i18n/I18nProvider';
-import { formatAmount } from '../format';
+import { formatAmount, formatDate } from '../format';
 
-export function CotisationsSection({ cotisations, total }: { cotisations: Movement[]; total: number }) {
+export function CotisationsSection({ cotisations, total }: { cotisations: Cotisation[]; total: number }) {
   const { t, locale } = useI18n();
 
   return (
@@ -12,11 +12,22 @@ export function CotisationsSection({ cotisations, total }: { cotisations: Moveme
         <p className="muted">{t('cotisationsEmpty')}</p>
       ) : (
         <>
-          <ul className="members">
-            {cotisations.map((cotisation, index) => (
-              <li key={index}>{cotisation.description}</li>
-            ))}
-          </ul>
+          <table className="data-table members">
+            <thead>
+              <tr>
+                <th scope="col">{t('memberName')}</th>
+                <th scope="col">{t('cotisationDate')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cotisations.map((cotisation, index) => (
+                <tr key={index}>
+                  <td>{cotisation.memberName}</td>
+                  <td>{formatDate(cotisation.date, locale, 'short')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           <table className="data-table">
             <tbody>
               <tr>

@@ -1,5 +1,3 @@
-import type { Movement } from './Movement';
-
 export interface Period {
   start: Date;
   end: Date;
@@ -25,6 +23,13 @@ export interface CategoryBreakdown {
   slices: ChartSlice[];
 }
 
+export interface Cotisation {
+  /** The member's name, taken from the movement description. */
+  memberName: string;
+  date: Date;
+  amount: number;
+}
+
 export interface GroupedCommand {
   key: string;
   expenses: number;
@@ -37,7 +42,7 @@ export interface FinancialSummary {
   period: Period;
   initialBalance: number;
   finalBalance: number;
-  cotisations: Movement[];
+  cotisations: Cotisation[];
   cotisationsTotal: number;
   expenses: CategoryBreakdown;
   incomes: CategoryBreakdown;

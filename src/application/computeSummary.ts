@@ -1,5 +1,6 @@
 import type {
   CategoryBreakdown,
+  Cotisation,
   ChartSlice,
   FinancialSummary,
   GroupedCommand,
@@ -19,14 +20,14 @@ export function computeSummary(movements: Movement[]): FinancialSummary {
   const ordered = orderChronologically(movements);
   const first = ordered[0];
   const last = ordered[ordered.length - 1];
-  const cotisations = ordered.filter(isCotisation);
+  const cotisations = ordered.filter(isCotisation).map(toCotisation);
 
   return {
     period: { start: first.date, end: last.date },
     initialBalance: roundCents(first.balance - first.credit + first.debit),
     finalBalance: last.balance,
     cotisations,
-    cotisationsTotal: sum(cotisations.map((movement) => movement.credit)),
+    cotisationsTotal: sum(cotisations.map((cotisation) => cotisation.amount)),
     expenses: breakdown(ordered, (movement) => movement.debit),
     incomes: breakdown(ordered, (movement) => movement.credit),
     groupedCommands: groupCommands(ordered),
@@ -47,6 +48,19 @@ export function orderChronologically(movements: Movement[]): Movement[] {
 
 function isCotisation(movement: Movement): boolean {
   return COTISATION_CATEGORIES.includes(normalizeText(movement.category));
+}
+
+function toCotisation(movement: Movement): Cotisation {
+  return { memberName: memberName(movement.description), date: movement.date, amount: movement.credit };
+}
+
+/**
+ * Removes the leading "Cotisation" word the descriptions start with:
+ * "Cotisation - Alice Martin" -> "Alice Martin".
+ */
+export function memberName(description: string): string {
+  const name = description.replace(/^\s*cotisations?\b[\s:,-]*/i, '').trim();
+  return name || description.trim();
 }
 
 export function breakdown(

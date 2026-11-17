@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { aMovement } from '../test/movementFactory';
-import { computeSummary } from './computeSummary';
+import { computeSummary, memberName } from './computeSummary';
 
 describe('computeSummary', () => {
   describe('period and balances', () => {
@@ -49,14 +49,29 @@ describe('computeSummary', () => {
 
   describe('cotisations', () => {
     it('lists the movements of the "cotisation" category, whatever the case', () => {
-      const alice = aMovement({ description: 'Alice', category: 'Cotisation', credit: 30 });
-      const bob = aMovement({ description: 'Bob', category: ' cotisations ', credit: 25 });
-      const other = aMovement({ category: 'Subvention', credit: 500 });
+      const summary = computeSummary([
+        aMovement({ date: '2025-01-05', description: 'Alice', category: 'Cotisation', credit: 30 }),
+        aMovement({ date: '2025-01-06', category: 'Subvention', credit: 500 }),
+        aMovement({ date: '2025-01-07', description: 'Bob', category: ' cotisations ', credit: 25 }),
+      ]);
 
-      const summary = computeSummary([alice, other, bob]);
-
-      expect(summary.cotisations).toEqual([alice, bob]);
+      expect(summary.cotisations).toEqual([
+        { memberName: 'Alice', date: new Date('2025-01-05T00:00:00Z'), amount: 30 },
+        { memberName: 'Bob', date: new Date('2025-01-07T00:00:00Z'), amount: 25 },
+      ]);
       expect(summary.cotisationsTotal).toBe(55);
+    });
+  });
+
+  describe('memberName', () => {
+    it.each([
+      ['Cotisation Alice Martin', 'Alice Martin'],
+      ['COTISATION - Bob Durand', 'Bob Durand'],
+      ['Cotisations: Chloé Petit', 'Chloé Petit'],
+      ['Alice Martin', 'Alice Martin'],
+      ['Cotisation', 'Cotisation'],
+    ])('turns "%s" into "%s"', (description, expected) => {
+      expect(memberName(description)).toBe(expected);
     });
   });
 

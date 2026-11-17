@@ -247,15 +247,7 @@ button:disabled {
 /* Cotisations */
 
 .members {
-  columns: 3 200px;
-  column-gap: 24px;
-  margin: 0 0 16px;
-  padding-left: 1.25rem;
-}
-
-.members li {
-  break-inside: avoid;
-  padding: 2px 0;
+  margin-bottom: 16px;
 }
 
 /* Breakdowns */
