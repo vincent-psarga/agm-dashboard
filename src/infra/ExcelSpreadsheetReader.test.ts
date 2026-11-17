@@ -16,14 +16,14 @@ describe('ExcelSpreadsheetReader', () => {
 
     expect(rows[0]).toEqual(['Date', 'Description', 'Type', 'Débit', 'Crédit', 'Raison', 'Tag', 'Solde']);
     expect(rows[1]).toEqual([
-      new Date('2025-12-31T00:00:00Z'),
+      new Date('2025-08-31T00:00:00Z'),
       'Frais bancaires',
       'Prélèvement',
       12,
       null,
       'Frais bancaires',
       null,
-      1191.2,
+      1194.2,
     ]);
   });
 
