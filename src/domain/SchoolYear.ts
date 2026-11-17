@@ -6,6 +6,16 @@ export interface SchoolYear {
   startYear: number;
 }
 
+export interface SchoolYearBalance {
+  schoolYear: SchoolYear;
+  /** Balance on the 1st of September, before the first movement of the year. */
+  openingBalance: number;
+  /** Balance on the 31st of August, after the last movement of the year. */
+  closingBalance: number;
+  /** closingBalance - openingBalance */
+  change: number;
+}
+
 /** 0-based month (September) on which a school year starts. */
 export const SCHOOL_YEAR_FIRST_MONTH = 8;
 

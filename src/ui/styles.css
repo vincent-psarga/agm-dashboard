@@ -258,6 +258,11 @@ button:disabled {
   white-space: nowrap;
 }
 
+.selected-year th,
+.selected-year td {
+  font-weight: 700;
+}
+
 .total-row th,
 .total-row td {
   font-weight: 700;

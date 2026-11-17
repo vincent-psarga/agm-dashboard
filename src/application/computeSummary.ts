@@ -18,19 +18,30 @@ export function computeSummary(movements: Movement[]): FinancialSummary {
   if (movements.length === 0) throw new Error('Cannot summarize an empty list of movements');
 
   const ordered = orderChronologically(movements);
-  const first = ordered[0];
-  const last = ordered[ordered.length - 1];
   const cotisations = ordered.filter(isCotisation).map(toCotisation);
 
   return {
-    period: { start: first.date, end: last.date },
-    initialBalance: roundCents(first.balance - first.credit + first.debit),
-    finalBalance: last.balance,
+    period: { start: ordered[0].date, end: ordered[ordered.length - 1].date },
+    ...balancesOf(ordered),
     cotisations,
     cotisationsTotal: sum(cotisations.map((cotisation) => cotisation.amount)),
     expenses: breakdown(ordered, (movement) => movement.debit),
     incomes: breakdown(ordered, (movement) => movement.credit),
     groupedCommands: groupCommands(ordered),
+  };
+}
+
+/**
+ * Balance before the first movement and after the last one.
+ * The initial balance is deduced from the first movement, by cancelling it.
+ */
+export function balancesOf(movements: Movement[]): { initialBalance: number; finalBalance: number } {
+  const ordered = orderChronologically(movements);
+  const first = ordered[0];
+  const last = ordered[ordered.length - 1];
+  return {
+    initialBalance: roundCents(first.balance - first.credit + first.debit),
+    finalBalance: last.balance,
   };
 }
 

@@ -56,8 +56,10 @@ describe('App', () => {
     expect(screen.getByText('Movements from 5 January 2025 to 20 June 2025')).toBeInTheDocument();
 
     const balance = screen.getByRole('region', { name: 'Account balance' });
-    expect(within(balance).getByRole('row', { name: /Balance on 5 January 2025/ })).toHaveTextContent('€100.00');
-    expect(within(balance).getByRole('row', { name: /Balance on 20 June 2025/ })).toHaveTextContent('-€100.00');
+    expect(within(balance).getAllByRole('row').map((row) => row.textContent)).toEqual([
+      'YearOn 1 SeptOn 31 AugChange',
+      '2024-2025€100.00-€100.00-€200.00',
+    ]);
 
     const cotisations = screen.getByRole('region', { name: 'Membership fees' });
     const [, firstMember] = within(cotisations).getAllByRole('row');
@@ -101,8 +103,12 @@ describe('App', () => {
 
       expect(await screen.findByRole('heading', { name: 'School year 2024-2025' })).toBeInTheDocument();
       const balance = screen.getByRole('region', { name: 'Account balance' });
-      expect(within(balance).getByRole('row', { name: /Balance on 15 September 2024/ })).toHaveTextContent('€325.00');
-      expect(within(balance).getByRole('row', { name: /Balance on 1 June 2025/ })).toHaveTextContent('€275.00');
+      expect(within(balance).getAllByRole('row').map((row) => row.textContent)).toEqual([
+        'YearOn 1 SeptOn 31 AugChange',
+        '2023-2024€500.00€325.00-€175.00',
+        '2024-2025€325.00€275.00-€50.00',
+      ]);
+      expect(within(balance).getByRole('row', { current: true })).toHaveTextContent('2024-2025');
       const cotisations = screen.getByRole('region', { name: 'Membership fees' });
       expect(within(cotisations).getByText('Alice')).toBeInTheDocument();
       expect(within(cotisations).queryByText('Zoé')).not.toBeInTheDocument();
@@ -115,6 +121,9 @@ describe('App', () => {
       await userEvent.selectOptions(await screen.findByLabelText('School year'), '2023-2024');
 
       expect(screen.getByRole('heading', { name: 'School year 2023-2024' })).toBeInTheDocument();
+      const balance = screen.getByRole('region', { name: 'Account balance' });
+      expect(within(balance).getAllByRole('row')).toHaveLength(2);
+      expect(within(balance).getByRole('row', { current: true })).toHaveTextContent('2023-2024');
       const cotisations = screen.getByRole('region', { name: 'Membership fees' });
       expect(within(cotisations).getByText('Zoé')).toBeInTheDocument();
       expect(within(cotisations).queryByText('Alice')).not.toBeInTheDocument();

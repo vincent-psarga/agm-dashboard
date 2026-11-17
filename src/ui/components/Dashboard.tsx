@@ -1,11 +1,16 @@
 import { useMemo, useState } from 'react';
 import { computeSummary } from '../../application/computeSummary';
-import { listSchoolYears, movementsOfSchoolYear } from '../../application/schoolYears';
+import {
+  compareWithPreviousSchoolYears,
+  listSchoolYears,
+  movementsOfSchoolYear,
+} from '../../application/schoolYears';
 import type { Movement } from '../../domain/Movement';
 import { schoolYearLabel } from '../../domain/SchoolYear';
 import type { SchoolYear } from '../../domain/SchoolYear';
 import { useI18n } from '../i18n/I18nProvider';
 import { formatDate } from '../format';
+import { BalanceComparisonTable } from './BalanceComparisonTable';
 import { BalanceTable } from './BalanceTable';
 import { BreakdownSection } from './BreakdownSection';
 import { CommandsSection } from './CommandsSection';
@@ -42,7 +47,14 @@ export function Dashboard({ movements }: { movements: Movement[] }) {
           <h2>{t('periodTitle', period)}</h2>
         )}
       </div>
-      <BalanceTable summary={summary} />
+      {schoolYear ? (
+        <BalanceComparisonTable
+          balances={compareWithPreviousSchoolYears(movements, schoolYear)}
+          selected={schoolYear}
+        />
+      ) : (
+        <BalanceTable summary={summary} />
+      )}
       <CotisationsSection cotisations={summary.cotisations} total={summary.cotisationsTotal} />
       <BreakdownSection id="expenses" title={t('expensesTitle')} breakdown={summary.expenses} />
       <BreakdownSection id="incomes" title={t('incomesTitle')} breakdown={summary.incomes} />
