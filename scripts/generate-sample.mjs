@@ -53,5 +53,11 @@ const rows = movements.map(([date, description, type, debit, credit, category, t
 rows.reverse();
 
 const output = new URL('../public/sample-movements.xlsx', import.meta.url).pathname;
-await writeExcelFile([header, ...rows]).toFile(output);
+// Real exports may hold other sheets before the movements: the app must find the right one.
+const notes = [['Notes'], ['Export des mouvements du compte courant de l’association.']];
+
+await writeExcelFile([
+  { sheet: 'Notes', data: notes },
+  { sheet: 'Mouvements', data: [header, ...rows] },
+]).toFile(output);
 console.log(`Sample written to ${output}`);

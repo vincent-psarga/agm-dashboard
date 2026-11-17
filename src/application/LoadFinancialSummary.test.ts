@@ -3,7 +3,9 @@ import { MovementsFileError } from '../domain/MovementsFileError';
 import type { SheetRows, SpreadsheetReader } from '../domain/SpreadsheetReader';
 import { LoadFinancialSummary } from './LoadFinancialSummary';
 
-const readerReturning = (rows: SheetRows): SpreadsheetReader => ({ read: async () => rows });
+const readerReturning = (rows: SheetRows): SpreadsheetReader => ({
+  read: async () => [{ name: 'Sheet1', rows }],
+});
 
 describe('LoadFinancialSummary', () => {
   it('reads the file and summarizes its movements', async () => {

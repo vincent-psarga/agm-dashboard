@@ -1,6 +1,6 @@
 import type { FinancialSummary } from '../domain/FinancialSummary';
 import { MovementsFileError } from '../domain/MovementsFileError';
-import type { SheetRows, SpreadsheetReader } from '../domain/SpreadsheetReader';
+import type { Sheet, SpreadsheetReader } from '../domain/SpreadsheetReader';
 import { computeSummary } from './computeSummary';
 import { parseMovements } from './parseMovements';
 
@@ -9,12 +9,12 @@ export class LoadFinancialSummary {
   constructor(private readonly reader: SpreadsheetReader) {}
 
   async execute(file: Blob): Promise<FinancialSummary> {
-    let rows: SheetRows;
+    let sheets: Sheet[];
     try {
-      rows = await this.reader.read(file);
+      sheets = await this.reader.read(file);
     } catch {
       throw new MovementsFileError('unreadableFile');
     }
-    return computeSummary(parseMovements(rows));
+    return computeSummary(parseMovements(sheets));
   }
 }

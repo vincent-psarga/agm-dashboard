@@ -63,9 +63,13 @@ function errorMessage(error: unknown, t: Translate): string {
   if (!(error instanceof MovementsFileError)) return t('errorUnknown');
   switch (error.code) {
     case 'missingColumns':
-      return t('errorMissingColumns', { columns: error.details.join(', ') });
+      return error.sheetName
+        ? t('errorMissingColumnsInSheet', { sheet: error.sheetName, columns: error.details.join(', ') })
+        : t('errorMissingColumns', { columns: error.details.join(', ') });
     case 'noMovements':
-      return t('errorNoMovements');
+      return error.sheetName
+        ? t('errorNoMovementsInSheet', { sheet: error.sheetName })
+        : t('errorNoMovements');
     case 'unreadableFile':
       return t('errorUnreadableFile');
   }

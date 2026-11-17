@@ -6,7 +6,8 @@ is never sent anywhere.
 
 ## Expected file
 
-The first sheet must contain a header row with these columns (any order, a title above is fine):
+One of the sheets must contain a header row with these columns (any order, a title above is fine).
+When the file has several sheets, the first one with these columns is used:
 
 | Column      | Usage                                                        |
 | ----------- | ------------------------------------------------------------ |

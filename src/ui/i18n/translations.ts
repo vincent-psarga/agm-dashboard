@@ -15,6 +15,9 @@ const fr = {
   changeFile: 'Changer de fichier',
   errorMissingColumns: 'Colonnes introuvables dans le fichier : {columns}.',
   errorNoMovements: 'Aucun mouvement n’a été trouvé dans le fichier.',
+  errorMissingColumnsInSheet:
+    'Aucune feuille du fichier ne contient toutes les colonnes attendues. La plus proche, « {sheet} », n’a pas les colonnes : {columns}.',
+  errorNoMovementsInSheet: 'Aucun mouvement n’a été trouvé dans la feuille « {sheet} ».',
   errorUnreadableFile: 'Impossible de lire ce fichier. Est-ce bien un fichier Excel (.xlsx) ?',
   errorUnknown: 'Une erreur inattendue est survenue.',
   periodTitle: 'Exercice du {start} au {end}',
@@ -59,6 +62,9 @@ const en: Record<TranslationKey, string> = {
   changeFile: 'Change file',
   errorMissingColumns: 'Columns not found in the file: {columns}.',
   errorNoMovements: 'No movement was found in the file.',
+  errorMissingColumnsInSheet:
+    'No sheet of the file has all the expected columns. The closest one, "{sheet}", lacks these columns: {columns}.',
+  errorNoMovementsInSheet: 'No movement was found in the "{sheet}" sheet.',
   errorUnreadableFile: 'This file cannot be read. Is it an Excel (.xlsx) file?',
   errorUnknown: 'An unexpected error occurred.',
   periodTitle: 'Financial year from {start} to {end}',

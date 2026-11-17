@@ -6,10 +6,13 @@ import { ExcelSpreadsheetReader } from './ExcelSpreadsheetReader';
 const SAMPLE = new URL('../../public/sample-movements.xlsx', import.meta.url);
 
 describe('ExcelSpreadsheetReader', () => {
-  it('reads the first sheet of an xlsx file as rows of cells', async () => {
+  it('reads every sheet of an xlsx file, as rows of cells', async () => {
     const file = new Blob([await readFile(SAMPLE)]);
 
-    const rows = await new ExcelSpreadsheetReader().read(file);
+    const sheets = await new ExcelSpreadsheetReader().read(file);
+
+    expect(sheets.map((sheet) => sheet.name)).toEqual(['Notes', 'Mouvements']);
+    const { rows } = sheets[1];
 
     expect(rows[0]).toEqual(['Date', 'Description', 'Type', 'Débit', 'Crédit', 'Raison', 'Tag', 'Solde']);
     expect(rows[1]).toEqual([

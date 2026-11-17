@@ -16,7 +16,7 @@ const ROWS: SheetRows = [
 ];
 
 function renderApp({ rows = ROWS, language = 'en' }: { rows?: SheetRows; language?: Language } = {}) {
-  const loadSummary = new LoadFinancialSummary({ read: async () => rows });
+  const loadSummary = new LoadFinancialSummary({ read: async () => [{ name: 'Sheet1', rows }] });
   render(
     <I18nProvider initialLanguage={language}>
       <App loadSummary={loadSummary} />
@@ -101,7 +101,7 @@ describe('App', () => {
     await uploadFile();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Columns not found in the file: debit, credit, category, balance.',
+      'Columns not found in the file: Débit, Crédit, Raison, Solde.',
     );
   });
 });
