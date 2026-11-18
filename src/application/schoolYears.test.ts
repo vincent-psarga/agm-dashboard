@@ -72,6 +72,50 @@ describe('compareWithPreviousSchoolYears', () => {
     ]);
   });
 
+  it('starts each year with the balance of the last row of the previous one', () => {
+    const rows = [
+      aMovement({ date: '2024-09-03', balance: 1234 }),
+      aMovement({ date: '2025-07-10', balance: 5678 }),
+      aMovement({ date: '2025-09-01', balance: 5656 }),
+      aMovement({ date: '2026-08-30', balance: 123 }),
+      aMovement({ date: '2026-09-01', balance: 456 }),
+    ];
+
+    expect(compareWithPreviousSchoolYears(rows, { startYear: 2026 })).toEqual([
+      { schoolYear: { startYear: 2024 }, openingBalance: 1234, closingBalance: 5678, change: 4444 },
+      { schoolYear: { startYear: 2025 }, openingBalance: 5678, closingBalance: 123, change: -5555 },
+      { schoolYear: { startYear: 2026 }, openingBalance: 123, closingBalance: 456, change: 333 },
+    ]);
+  });
+
+  it('ends a year with the balance of its last row in the file, even with a typo in a date', () => {
+    const rows = [
+      aMovement({ date: '2025-08-10', debit: 10, balance: 500 }),
+      // Typed 2026 instead of 2025: this row belongs to 2025-2026 by its date.
+      aMovement({ date: '2026-08-20', credit: 150, balance: 650 }),
+      aMovement({ date: '2025-08-25', debit: 40, balance: 610 }),
+      aMovement({ date: '2025-09-02', credit: 30, balance: 640 }),
+    ];
+
+    expect(compareWithPreviousSchoolYears(rows, { startYear: 2025 })).toEqual([
+      { schoolYear: { startYear: 2024 }, openingBalance: 510, closingBalance: 610, change: 100 },
+      { schoolYear: { startYear: 2025 }, openingBalance: 610, closingBalance: 640, change: 30 },
+    ]);
+  });
+
+  it('starts the first shown year with the balance of the year before it, even if not shown', () => {
+    const rows = [
+      aMovement({ date: '2021-10-01', balance: 1000 }),
+      aMovement({ date: '2022-10-01', balance: 1300 }),
+      aMovement({ date: '2023-10-01', balance: 1250 }),
+      aMovement({ date: '2024-10-01', balance: 2000 }),
+    ];
+
+    const [firstShown] = compareWithPreviousSchoolYears(rows, { startYear: 2024 });
+
+    expect(firstShown).toMatchObject({ schoolYear: { startYear: 2022 }, openingBalance: 1000 });
+  });
+
   it('ignores the school years following the selected one', () => {
     const years = compareWithPreviousSchoolYears(movements, { startYear: 2022 });
 

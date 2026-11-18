@@ -27,8 +27,8 @@ export function Dashboard({ movements }: { movements: Movement[] }) {
   const [schoolYear, setSchoolYear] = useState<SchoolYear | null>(schoolYears[0]);
 
   const summary = useMemo(
-    () => computeSummary(movementsOfSchoolYear(movements, schoolYear)),
-    [movements, schoolYear],
+    () => computeSummary(movementsOfSchoolYear(movements, schoolYear), rowOrder.mostRecentFirst),
+    [movements, schoolYear, rowOrder],
   );
   const period = {
     start: formatDate(summary.period.start, locale),

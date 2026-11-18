@@ -17,15 +17,23 @@ export const NAMED_SLICES_COUNT = 5;
 const COTISATION_CATEGORIES = ['cotisation', 'cotisations'];
 const COMMAND_TAG_PREFIX = 'cmd:';
 
-export function computeSummary(movements: Movement[]): FinancialSummary {
+/**
+ * @param mostRecentFirst order of the rows in the whole file: it must be given when the
+ * movements are only a part of the file (e.g. a school year), as a few rows are not enough
+ * to know it.
+ */
+export function computeSummary(
+  movements: Movement[],
+  mostRecentFirst = analyzeRowOrder(movements).mostRecentFirst,
+): FinancialSummary {
   if (movements.length === 0) throw new Error('Cannot summarize an empty list of movements');
 
-  const ordered = orderChronologically(movements);
+  const ordered = orderChronologically(movements, mostRecentFirst);
   const cotisations = ordered.filter(isCotisation).map(toCotisation);
 
   return {
     period: { start: ordered[0].date, end: ordered[ordered.length - 1].date },
-    ...balancesOf(ordered),
+    ...balancesOf(movements, mostRecentFirst),
     cotisations,
     cotisationsTotal: sum(cotisations.map((cotisation) => cotisation.amount)),
     expenses: breakdown(ordered, (movement) => movement.debit),
@@ -35,13 +43,19 @@ export function computeSummary(movements: Movement[]): FinancialSummary {
 }
 
 /**
- * Balance before the first movement and after the last one.
- * The initial balance is deduced from the first movement, by cancelling it.
+ * Balance before the first row of the file and after its last row.
+ *
+ * The rows are taken in the order of the file, not sorted by date: the "Solde" column follows
+ * the order of the rows, so a row with a typo in its date must not change which balance is
+ * read. The initial balance is deduced from the first row, by cancelling its movement.
  */
-export function balancesOf(movements: Movement[]): { initialBalance: number; finalBalance: number } {
-  const ordered = orderChronologically(movements);
-  const first = ordered[0];
-  const last = ordered[ordered.length - 1];
+export function balancesOf(
+  movements: Movement[],
+  mostRecentFirst = analyzeRowOrder(movements).mostRecentFirst,
+): { initialBalance: number; finalBalance: number } {
+  const fileOrder = mostRecentFirst ? [...movements].reverse() : movements;
+  const first = fileOrder[0];
+  const last = fileOrder[fileOrder.length - 1];
   return {
     initialBalance: roundCents(first.balance - first.credit + first.debit),
     finalBalance: last.balance,
@@ -53,8 +67,10 @@ export function balancesOf(movements: Movement[]): { initialBalance: number; fin
  * The order of the file is kept for movements happening on the same day, as it is
  * the only information we have to know which one came first.
  */
-export function orderChronologically(movements: Movement[]): Movement[] {
-  const { mostRecentFirst } = analyzeRowOrder(movements);
+export function orderChronologically(
+  movements: Movement[],
+  mostRecentFirst = analyzeRowOrder(movements).mostRecentFirst,
+): Movement[] {
   const fileOrder = mostRecentFirst ? [...movements].reverse() : [...movements];
   return fileOrder.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
