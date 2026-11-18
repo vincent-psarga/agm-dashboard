@@ -2,7 +2,8 @@ import type { Movement } from '../domain/Movement';
 import type { RowOrder } from '../domain/RowOrder';
 
 /**
- * Checks that the rows of the file are sorted by date.
+ * Checks that the rows of the file are sorted by month: rows of the same month may be in
+ * any order (the day does not matter), but a row in the wrong month or year is reported.
  *
  * The misplaced rows are the fewest rows to move for all the other ones to be sorted:
  * a single row with a typo in its date is reported alone, not with all the rows after it.
@@ -10,9 +11,9 @@ import type { RowOrder } from '../domain/RowOrder';
  * moves is the order of the file, the oldest first winning a tie.
  */
 export function analyzeRowOrder(movements: Movement[]): RowOrder {
-  const dates = movements.map((movement) => movement.date.getTime());
-  const oldestFirstSorted = longestSortedSubsequence(dates);
-  const mostRecentFirstSorted = longestSortedSubsequence(dates.map((date) => -date));
+  const months = movements.map(({ date }) => date.getUTCFullYear() * 12 + date.getUTCMonth());
+  const oldestFirstSorted = longestSortedSubsequence(months);
+  const mostRecentFirstSorted = longestSortedSubsequence(months.map((month) => -month));
   const mostRecentFirst = mostRecentFirstSorted.size > oldestFirstSorted.size;
   const sorted = mostRecentFirst ? mostRecentFirstSorted : oldestFirstSorted;
 
@@ -33,30 +34,46 @@ export function analyzeRowOrder(movements: Movement[]): RowOrder {
 }
 
 /**
- * Indexes of a longest non-decreasing subsequence of the values (patience sorting,
- * O(n log n)). Equal values are fine: several movements happen on the same day.
+ * Indexes of a longest non-decreasing subsequence of the values: the rows to keep.
+ * Equal values are fine: several movements happen in the same month.
+ *
+ * Several subsequences may be equally long: the one spanning the smallest range is kept,
+ * so that the reported row is the one standing out from its neighbours.
+ * E.g. in [Dec, Nov, Dec], the November row is reported rather than the first December one.
  */
 function longestSortedSubsequence(values: number[]): Set<number> {
-  // tails[k]: index of the smallest possible last value of a subsequence of length k + 1.
-  const tails: number[] = [];
-  const previousInSubsequence = new Array<number>(values.length).fill(-1);
+  // For the best subsequence ending at each index: its length, its first value and the
+  // previous index in it. Quadratic, which is fine for the size of a bank export.
+  const length = new Array<number>(values.length).fill(1);
+  const first = [...values];
+  const previous = new Array<number>(values.length).fill(-1);
 
-  values.forEach((value, index) => {
-    // First tail strictly greater than the value: equal values extend the subsequence.
-    let low = 0;
-    let high = tails.length;
-    while (low < high) {
-      const middle = (low + high) >> 1;
-      if (values[tails[middle]] <= value) low = middle + 1;
-      else high = middle;
+  for (let index = 0; index < values.length; index++) {
+    for (let before = 0; before < index; before++) {
+      if (values[before] > values[index]) continue;
+      const isLonger = length[before] + 1 > length[index];
+      const isTighter = length[before] + 1 === length[index] && first[before] > first[index];
+      if (isLonger || isTighter) {
+        length[index] = length[before] + 1;
+        first[index] = first[before];
+        previous[index] = before;
+      }
     }
-    if (low > 0) previousInSubsequence[index] = tails[low - 1];
-    tails[low] = index;
-  });
+  }
+
+  let last = -1;
+  for (let index = 0; index < values.length; index++) {
+    const span = values[index] - first[index];
+    if (
+      last === -1 ||
+      length[index] > length[last] ||
+      (length[index] === length[last] && span < values[last] - first[last])
+    ) {
+      last = index;
+    }
+  }
 
   const indexes = new Set<number>();
-  for (let index = tails[tails.length - 1] ?? -1; index !== -1; index = previousInSubsequence[index]) {
-    indexes.add(index);
-  }
+  for (let index = last; index !== -1; index = previous[index]) indexes.add(index);
   return indexes;
 }

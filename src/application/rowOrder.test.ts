@@ -24,6 +24,18 @@ describe('analyzeRowOrder', () => {
     });
   });
 
+  it('accepts days of the same month in any order', () => {
+    expect(misplacedRows(['2024-12-03', '2024-12-02', '2024-12-05'])).toEqual([]);
+  });
+
+  it('reports a row in the wrong month', () => {
+    expect(misplacedRows(['2024-12-03', '2024-11-04', '2024-12-05'])).toEqual([3]);
+  });
+
+  it('reports a row in the wrong year', () => {
+    expect(misplacedRows(['2024-12-03', '2025-12-04', '2024-12-05'])).toEqual([3]);
+  });
+
   it('reports only the row with a typo in its year, not the rows after it', () => {
     expect(
       misplacedRows(['2025-08-10', '2026-08-20', '2025-08-25', '2025-09-02', '2025-09-10']),
