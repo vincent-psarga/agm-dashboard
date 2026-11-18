@@ -86,6 +86,34 @@ describe('App', () => {
     );
   });
 
+  it('shows the movements of a category when clicking on it', async () => {
+    renderApp();
+    await uploadFile();
+    const expenses = await screen.findByRole('region', { name: 'Expenses' });
+    const category = within(expenses).getByRole('button', { name: 'Commande' });
+
+    await userEvent.click(category);
+
+    expect(category).toHaveAttribute('aria-expanded', 'true');
+    const movements = within(expenses).getByRole('table', { name: 'Movements of the Commande category' });
+    expect(within(movements).getAllByRole('row').map((row) => row.textContent)).toEqual([
+      '10/02/2025Achat épées€450.00',
+    ]);
+  });
+
+  it('hides the movements of a category when clicking on it again', async () => {
+    renderApp();
+    await uploadFile();
+    const expenses = await screen.findByRole('region', { name: 'Expenses' });
+    const category = within(expenses).getByRole('button', { name: 'Commande' });
+
+    await userEvent.click(category);
+    await userEvent.click(category);
+
+    expect(category).toHaveAttribute('aria-expanded', 'false');
+    expect(within(expenses).queryByRole('table', { name: /Movements of/ })).not.toBeInTheDocument();
+  });
+
   it('does not show the grouped orders section when no movement is tagged "cmd:..."', async () => {
     renderApp({ rows: ROWS.map((row) => row.map((cell) => (cell === 'cmd:sword' ? null : cell))) });
 

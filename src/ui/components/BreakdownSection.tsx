@@ -1,8 +1,9 @@
+import { Fragment, useState } from 'react';
 import { Cell, Pie, PieChart } from 'recharts';
 import type { PieLabelRenderProps } from 'recharts';
-import type { CategoryBreakdown } from '../../domain/FinancialSummary';
+import type { CategoryBreakdown, CategoryTotal } from '../../domain/FinancialSummary';
 import { useChartPalette } from '../charts/palette';
-import { formatAmount, formatPercent } from '../format';
+import { formatAmount, formatDate, formatPercent } from '../format';
 import { useI18n } from '../i18n/I18nProvider';
 
 const PIE_WIDTH = 460;
@@ -53,12 +54,13 @@ export function BreakdownSection({ id, title, breakdown }: Props) {
             </tr>
           </thead>
           <tbody>
-            {breakdown.categories.map(({ category, amount }) => (
-              <tr key={category}>
-                <td>{categoryName(category)}</td>
-                <td className="amount">{formatAmount(amount, locale)}</td>
-                <td className="amount muted">{formatPercent(amount / breakdown.total, locale)}</td>
-              </tr>
+            {breakdown.categories.map((categoryTotal) => (
+              <CategoryRows
+                key={categoryTotal.category}
+                categoryTotal={categoryTotal}
+                name={categoryName(categoryTotal.category)}
+                total={breakdown.total}
+              />
             ))}
           </tbody>
           <tfoot>
@@ -122,5 +124,58 @@ function SliceLabel({
         {formatPercent(percent ?? 0, locale)}
       </tspan>
     </text>
+  );
+}
+
+/**
+ * A category of the table. Clicking on it shows its movements below it, to check where the
+ * amount comes from during the meeting. The movements are not printed.
+ */
+function CategoryRows({
+  categoryTotal: { amount, movements },
+  name,
+  total,
+}: {
+  categoryTotal: CategoryTotal;
+  name: string;
+  total: number;
+}) {
+  const { t, locale } = useI18n();
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Fragment>
+      <tr>
+        <td>
+          <button
+            type="button"
+            className="category-toggle"
+            aria-expanded={isOpen}
+            onClick={() => setIsOpen((open) => !open)}
+          >
+            {name}
+          </button>
+        </td>
+        <td className="amount">{formatAmount(amount, locale)}</td>
+        <td className="amount muted">{formatPercent(amount / total, locale)}</td>
+      </tr>
+      {isOpen && (
+        <tr className="category-movements no-print">
+          <td colSpan={3}>
+            <table aria-label={t('categoryMovements', { category: name })}>
+              <tbody>
+                {movements.map((movement, index) => (
+                  <tr key={index}>
+                    <td>{formatDate(movement.date, locale, 'short')}</td>
+                    <td>{movement.description}</td>
+                    <td className="amount">{formatAmount(movement.amount, locale)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      )}
+    </Fragment>
   );
 }

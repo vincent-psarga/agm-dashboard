@@ -84,12 +84,30 @@ describe('computeSummary', () => {
         aMovement({ category: 'Grant', credit: 500 }),
       ]);
 
-      expect(summary.expenses.categories).toEqual([
+      const totals = (categories: { category: string; amount: number }[]) =>
+        categories.map(({ category, amount }) => ({ category, amount }));
+      expect(totals(summary.expenses.categories)).toEqual([
         { category: 'Rent', amount: 220 },
         { category: 'Insurance', amount: 210.5 },
       ]);
       expect(summary.expenses.total).toBe(430.5);
-      expect(summary.incomes.categories).toEqual([{ category: 'Grant', amount: 500 }]);
+      expect(totals(summary.incomes.categories)).toEqual([{ category: 'Grant', amount: 500 }]);
+    });
+
+    it('keeps the movements of each category, oldest first', () => {
+      const summary = computeSummary([
+        aMovement({ date: '2025-03-01', description: 'March rent', category: 'Rent', debit: 120 }),
+        aMovement({ date: '2025-02-01', description: 'February rent', category: 'Rent', debit: 100 }),
+        aMovement({ date: '2025-02-15', description: 'Grant', category: 'Grant', credit: 500 }),
+      ]);
+
+      expect(summary.expenses.categories[0].movements).toEqual([
+        { date: new Date('2025-02-01T00:00:00Z'), description: 'February rent', amount: 100 },
+        { date: new Date('2025-03-01T00:00:00Z'), description: 'March rent', amount: 120 },
+      ]);
+      expect(summary.incomes.categories[0].movements).toEqual([
+        { date: new Date('2025-02-15T00:00:00Z'), description: 'Grant', amount: 500 },
+      ]);
     });
 
     it('names the 5 biggest categories in the chart and groups the other ones', () => {

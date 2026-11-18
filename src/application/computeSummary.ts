@@ -1,5 +1,7 @@
 import type {
   CategoryBreakdown,
+  CategoryMovement,
+  CategoryTotal,
   Cotisation,
   ChartSlice,
   FinancialSummary,
@@ -78,15 +80,21 @@ export function breakdown(
   movements: Movement[],
   amountOf: (movement: Movement) => number,
 ): CategoryBreakdown {
-  const totals = new Map<string, number>();
+  const movementsByCategory = new Map<string, CategoryMovement[]>();
   for (const movement of movements) {
     const amount = amountOf(movement);
     if (amount === 0) continue;
-    totals.set(movement.category, (totals.get(movement.category) ?? 0) + amount);
+    const categoryMovements = movementsByCategory.get(movement.category) ?? [];
+    categoryMovements.push({ date: movement.date, description: movement.description, amount });
+    movementsByCategory.set(movement.category, categoryMovements);
   }
 
-  const categories = [...totals.entries()]
-    .map(([category, amount]) => ({ category, amount: roundCents(amount) }))
+  const categories = [...movementsByCategory.entries()]
+    .map(([category, categoryMovements]) => ({
+      category,
+      amount: sum(categoryMovements.map((movement) => movement.amount)),
+      movements: categoryMovements,
+    }))
     .sort((a, b) => b.amount - a.amount || a.category.localeCompare(b.category));
 
   return {
@@ -98,9 +106,10 @@ export function breakdown(
 
 function toSlices(categories: CategoryBreakdown['categories']): ChartSlice[] {
   // Grouping a single category under "others" would hide its name for nothing.
-  if (categories.length <= NAMED_SLICES_COUNT + 1) return categories;
+  const toSlice = ({ category, amount }: CategoryTotal): ChartSlice => ({ category, amount });
+  if (categories.length <= NAMED_SLICES_COUNT + 1) return categories.map(toSlice);
 
-  const named = categories.slice(0, NAMED_SLICES_COUNT);
+  const named = categories.slice(0, NAMED_SLICES_COUNT).map(toSlice);
   const others = categories.slice(NAMED_SLICES_COUNT);
   return [...named, { category: null, amount: sum(others.map((category) => category.amount)) }];
 }

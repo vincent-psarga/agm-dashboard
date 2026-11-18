@@ -3,10 +3,19 @@ export interface Period {
   end: Date;
 }
 
+/** A movement of a category, with the amount counted in that category. */
+export interface CategoryMovement {
+  date: Date;
+  description: string;
+  amount: number;
+}
+
 export interface CategoryTotal {
   /** The category name. An empty string means "uncategorized". */
   category: string;
   amount: number;
+  /** The movements of the category, from the oldest to the most recent. */
+  movements: CategoryMovement[];
 }
 
 export interface ChartSlice {
