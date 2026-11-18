@@ -1,13 +1,9 @@
 import { Fragment, useState } from 'react';
-import { Cell, Pie, PieChart } from 'recharts';
-import type { PieLabelRenderProps } from 'recharts';
 import type { CategoryBreakdown, CategoryTotal } from '../../domain/FinancialSummary';
+import { PieChart } from '../charts/PieChart';
 import { useChartPalette } from '../charts/palette';
 import { formatAmount, formatDate, formatPercent } from '../format';
 import { useI18n } from '../i18n/I18nProvider';
-
-const PIE_WIDTH = 460;
-const PIE_HEIGHT = 300;
 
 interface Props {
   id: string;
@@ -35,6 +31,7 @@ export function BreakdownSection({ id, title, breakdown }: Props) {
     name: categoryName(slice.category),
     value: slice.amount,
     color: slice.category === null ? palette.others : palette.categorical[index],
+    percentLabel: formatPercent(slice.amount / breakdown.total, locale),
   }));
 
   return (
@@ -73,57 +70,10 @@ export function BreakdownSection({ id, title, breakdown }: Props) {
         </table>
 
         <figure className="chart" aria-label={t('chartLabel', { title: title.toLowerCase() })}>
-          {/*
-            Drawn at a fixed size then scaled to the column by CSS: the labels shrink
-            with the pie instead of being cut when the column is narrow (e.g. printed).
-          */}
-          <PieChart width={PIE_WIDTH} height={PIE_HEIGHT}>
-            <Pie
-              data={slices}
-              dataKey="value"
-              nameKey="name"
-              outerRadius="62%"
-              stroke={palette.surface}
-              strokeWidth={2}
-              isAnimationActive={false}
-              label={(props: PieLabelRenderProps) => (
-                <SliceLabel {...props} locale={locale} color={palette.text} />
-              )}
-              labelLine={{ stroke: palette.axis }}
-            >
-              {slices.map((slice) => (
-                <Cell key={slice.name} fill={slice.color} />
-              ))}
-            </Pie>
-          </PieChart>
+          <PieChart slices={slices} palette={palette} />
         </figure>
       </div>
     </section>
-  );
-}
-
-/**
- * Category name and percentage written next to each slice: the chart can be read
- * without matching colors (color-blind readers, black and white prints).
- */
-function SliceLabel({
-  x,
-  y,
-  textAnchor,
-  name,
-  percent,
-  locale,
-  color,
-}: PieLabelRenderProps & { locale: string; color: string }) {
-  return (
-    <text x={x} y={y} textAnchor={textAnchor} fill={color} fontSize={13}>
-      <tspan x={x} dy="-0.2em">
-        {name}
-      </tspan>
-      <tspan x={x} dy="1.2em" fontWeight={600}>
-        {formatPercent(percent ?? 0, locale)}
-      </tspan>
-    </text>
   );
 }
 

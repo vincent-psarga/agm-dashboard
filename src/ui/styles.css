@@ -333,17 +333,12 @@ button:disabled {
 }
 
 /* The pie is drawn at a fixed size: scale it (labels included) to the column. */
-.chart .recharts-wrapper {
-  width: 100% !important;
-  max-width: 460px;
-  height: auto !important;
-  margin: 0 auto;
-}
-
-.chart .recharts-surface {
+.pie-chart {
   display: block;
   width: 100%;
+  max-width: 600px;
   height: auto;
+  margin: 0 auto;
 }
 
 /* Movements of a category, shown when clicking on it */
