@@ -118,18 +118,19 @@ h3 {
   margin: 4px 0 0;
 }
 
-.school-year-selector {
+.year-selector {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 8px 12px;
   margin-bottom: 16px;
 }
 
-.school-year-selector label {
+.year-selector label {
   font-weight: 600;
 }
 
-.school-year-selector select {
+.year-selector select {
   font: inherit;
   color: var(--text-primary);
   background: var(--surface);
@@ -155,7 +156,8 @@ h3 {
 .button-primary,
 .button-secondary,
 .button-link,
-.language-switcher button {
+.language-switcher button,
+.segmented button {
   font: inherit;
   cursor: pointer;
   border-radius: 8px;
@@ -237,14 +239,16 @@ button:disabled {
   white-space: nowrap;
 }
 
-.language-switcher {
+.language-switcher,
+.segmented {
   display: inline-flex;
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
 }
 
-.language-switcher button {
+.language-switcher button,
+.segmented button {
   border: none;
   border-radius: 0;
   background: transparent;
@@ -252,7 +256,8 @@ button:disabled {
   padding: 6px 10px;
 }
 
-.language-switcher button[aria-pressed='true'] {
+.language-switcher button[aria-pressed='true'],
+.segmented button[aria-pressed='true'] {
   background: var(--accent);
   color: var(--accent-ink);
   font-weight: 600;

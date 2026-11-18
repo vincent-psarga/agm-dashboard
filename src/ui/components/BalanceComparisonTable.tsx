@@ -1,15 +1,15 @@
-import { schoolYearLabel } from '../../domain/SchoolYear';
-import type { SchoolYear, SchoolYearBalance } from '../../domain/SchoolYear';
+import { isSameYear, yearLabel } from '../../domain/Year';
+import type { Year, YearBalance } from '../../domain/Year';
 import { useI18n } from '../i18n/I18nProvider';
 import { formatAmount, formatSignedAmount } from '../format';
 
 interface Props {
-  /** From the oldest school year to the selected one. */
-  balances: SchoolYearBalance[];
-  selected: SchoolYear;
+  /** From the oldest year to the selected one. */
+  balances: YearBalance[];
+  selected: Year;
 }
 
-/** Account balance of the selected school year, compared with the previous ones. */
+/** Account balance of the selected year, compared with the previous ones. */
 export function BalanceComparisonTable({ balances, selected }: Props) {
   const { t, locale } = useI18n();
 
@@ -19,12 +19,12 @@ export function BalanceComparisonTable({ balances, selected }: Props) {
       <table className="data-table balance-comparison">
         <thead>
           <tr>
-            <th scope="col">{t('schoolYearColumn')}</th>
+            <th scope="col">{t('yearColumn')}</th>
             <th scope="col" className="amount">
-              {t('openingBalanceColumn')}
+              {t(selected.kind === 'school' ? 'schoolOpeningBalanceColumn' : 'calendarOpeningBalanceColumn')}
             </th>
             <th scope="col" className="amount">
-              {t('closingBalanceColumn')}
+              {t(selected.kind === 'school' ? 'schoolClosingBalanceColumn' : 'calendarClosingBalanceColumn')}
             </th>
             <th scope="col" className="amount">
               {t('balanceVariation')}
@@ -32,15 +32,15 @@ export function BalanceComparisonTable({ balances, selected }: Props) {
           </tr>
         </thead>
         <tbody>
-          {balances.map(({ schoolYear, openingBalance, closingBalance, change }) => {
-            const isSelected = schoolYear.startYear === selected.startYear;
+          {balances.map(({ year, openingBalance, closingBalance, change }) => {
+            const isSelected = isSameYear(year, selected);
             return (
               <tr
-                key={schoolYear.startYear}
+                key={year.startYear}
                 className={isSelected ? 'selected-year' : undefined}
                 aria-current={isSelected ? 'true' : undefined}
               >
-                <th scope="row">{schoolYearLabel(schoolYear)}</th>
+                <th scope="row">{yearLabel(year)}</th>
                 <td className="amount">{formatAmount(openingBalance, locale)}</td>
                 <td className="amount">{formatAmount(closingBalance, locale)}</td>
                 <td className={`amount ${change < 0 ? 'negative' : 'positive'}`}>

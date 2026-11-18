@@ -146,7 +146,7 @@ describe('App', () => {
       renderApp({ rows: TWO_YEARS_ROWS });
       await uploadFile();
 
-      await userEvent.selectOptions(await screen.findByLabelText('School year'), '2023-2024');
+      await userEvent.selectOptions(await screen.findByLabelText('Year'), '2023-2024');
 
       expect(screen.getByRole('heading', { name: 'School year 2023-2024' })).toBeInTheDocument();
       const balance = screen.getByRole('region', { name: 'Account balance' });
@@ -163,13 +163,56 @@ describe('App', () => {
       renderApp({ rows: TWO_YEARS_ROWS });
       await uploadFile();
 
-      await userEvent.selectOptions(await screen.findByLabelText('School year'), 'Whole period');
+      await userEvent.selectOptions(await screen.findByLabelText('Year'), 'Whole period');
 
       expect(
         screen.getByRole('heading', { name: 'Financial year from 15 September 2023 to 1 June 2025' }),
       ).toBeInTheDocument();
       const balance = screen.getByRole('region', { name: 'Account balance' });
       expect(within(balance).getByRole('row', { name: /Balance on 15 September 2023/ })).toHaveTextContent('€500.00');
+    });
+  });
+
+  describe('when choosing calendar years', () => {
+    it('shows the most recent calendar year, compared with the previous ones', async () => {
+      renderApp({ rows: TWO_YEARS_ROWS });
+      await uploadFile();
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Calendar' }));
+
+      expect(screen.getByRole('heading', { name: 'Calendar year 2025' })).toBeInTheDocument();
+      const balance = screen.getByRole('region', { name: 'Account balance' });
+      expect(within(balance).getAllByRole('row').map((row) => row.textContent)).toEqual([
+        'YearOn 1 JanOn 31 DecChange',
+        '2023€500.00€525.00+€25.00',
+        '2024€525.00€355.00-€170.00',
+        '2025€355.00€275.00-€80.00',
+      ]);
+      const expenses = screen.getByRole('region', { name: 'Expenses' });
+      expect(within(expenses).getByRole('row', { name: /Total/ })).toHaveTextContent('€80.00');
+    });
+
+    it('lists the calendar years in the year selector', async () => {
+      renderApp({ rows: TWO_YEARS_ROWS });
+      await uploadFile();
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Calendar' }));
+      await userEvent.selectOptions(screen.getByLabelText('Year'), '2024');
+
+      expect(screen.getByRole('heading', { name: 'Calendar year 2024' })).toBeInTheDocument();
+      const cotisations = screen.getByRole('region', { name: 'Membership fees' });
+      expect(within(cotisations).getByText('Alice')).toBeInTheDocument();
+      expect(within(cotisations).queryByText('Zoé')).not.toBeInTheDocument();
+    });
+
+    it('goes back to school years', async () => {
+      renderApp({ rows: TWO_YEARS_ROWS });
+      await uploadFile();
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Calendar' }));
+      await userEvent.click(screen.getByRole('button', { name: 'School' }));
+
+      expect(screen.getByRole('heading', { name: 'School year 2024-2025' })).toBeInTheDocument();
     });
   });
 
@@ -225,7 +268,7 @@ describe('App', () => {
     await uploadFile();
 
     await screen.findByRole('heading', { name: 'School year 2024-2025' });
-    expect(screen.queryByLabelText('School year')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Year')).not.toBeInTheDocument();
   });
 
   it('can be displayed in French', async () => {
