@@ -23,6 +23,7 @@ export function YearSelector({ kind, onKindChange, years, selected, onSelect }: 
 
   return (
     <div className="year-selector no-print">
+      <label htmlFor={id}>{t('yearSelectLabel')}</label>
       <div className="segmented" role="group" aria-label={t('yearKindLabel')}>
         {KINDS.map((option) => (
           <button
@@ -35,7 +36,6 @@ export function YearSelector({ kind, onKindChange, years, selected, onSelect }: 
           </button>
         ))}
       </div>
-      <label htmlFor={id}>{t('yearSelectLabel')}</label>
       <select
         id={id}
         value={selected ? String(selected.startYear) : WHOLE_PERIOD}

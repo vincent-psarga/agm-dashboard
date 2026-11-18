@@ -146,7 +146,7 @@ describe('App', () => {
       renderApp({ rows: TWO_YEARS_ROWS });
       await uploadFile();
 
-      await userEvent.selectOptions(await screen.findByLabelText('Year'), '2023-2024');
+      await userEvent.selectOptions(await screen.findByLabelText('Select year'), '2023-2024');
 
       expect(screen.getByRole('heading', { name: 'School year 2023-2024' })).toBeInTheDocument();
       const balance = screen.getByRole('region', { name: 'Account balance' });
@@ -163,7 +163,7 @@ describe('App', () => {
       renderApp({ rows: TWO_YEARS_ROWS });
       await uploadFile();
 
-      await userEvent.selectOptions(await screen.findByLabelText('Year'), 'Whole period');
+      await userEvent.selectOptions(await screen.findByLabelText('Select year'), 'Whole period');
 
       expect(
         screen.getByRole('heading', { name: 'Financial year from 15 September 2023 to 1 June 2025' }),
@@ -180,7 +180,7 @@ describe('App', () => {
 
       await userEvent.click(await screen.findByRole('button', { name: 'Calendar' }));
 
-      expect(screen.getByRole('heading', { name: 'Calendar year 2025' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Year 2025' })).toBeInTheDocument();
       const balance = screen.getByRole('region', { name: 'Account balance' });
       expect(within(balance).getAllByRole('row').map((row) => row.textContent)).toEqual([
         'YearOn 1 JanOn 31 DecChange',
@@ -197,9 +197,9 @@ describe('App', () => {
       await uploadFile();
 
       await userEvent.click(await screen.findByRole('button', { name: 'Calendar' }));
-      await userEvent.selectOptions(screen.getByLabelText('Year'), '2024');
+      await userEvent.selectOptions(screen.getByLabelText('Select year'), '2024');
 
-      expect(screen.getByRole('heading', { name: 'Calendar year 2024' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Year 2024' })).toBeInTheDocument();
       const cotisations = screen.getByRole('region', { name: 'Membership fees' });
       expect(within(cotisations).getByText('Alice')).toBeInTheDocument();
       expect(within(cotisations).queryByText('Zoé')).not.toBeInTheDocument();
@@ -268,7 +268,7 @@ describe('App', () => {
     await uploadFile();
 
     await screen.findByRole('heading', { name: 'School year 2024-2025' });
-    expect(screen.queryByLabelText('Year')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Select year')).not.toBeInTheDocument();
   });
 
   it('can be displayed in French', async () => {
