@@ -7,6 +7,7 @@ import type {
 } from '../domain/FinancialSummary';
 import type { Movement } from '../domain/Movement';
 import { normalizeText } from './cellParsers';
+import { analyzeRowOrder } from './rowOrder';
 
 /** Number of categories named in the pie charts, the other ones are grouped together. */
 export const NAMED_SLICES_COUNT = 5;
@@ -51,9 +52,8 @@ export function balancesOf(movements: Movement[]): { initialBalance: number; fin
  * the only information we have to know which one came first.
  */
 export function orderChronologically(movements: Movement[]): Movement[] {
-  const isMostRecentFirst =
-    movements[0].date.getTime() > movements[movements.length - 1].date.getTime();
-  const fileOrder = isMostRecentFirst ? [...movements].reverse() : [...movements];
+  const { mostRecentFirst } = analyzeRowOrder(movements);
+  const fileOrder = mostRecentFirst ? [...movements].reverse() : [...movements];
   return fileOrder.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 

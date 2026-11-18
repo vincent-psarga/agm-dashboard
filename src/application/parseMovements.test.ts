@@ -33,6 +33,7 @@ describe('parseMovements', () => {
         category: 'Cotisation',
         tag: '',
         balance: 130,
+        rowNumber: 2,
       },
     ]);
   });
@@ -47,7 +48,13 @@ describe('parseMovements', () => {
 
     const [movement] = parseMovements([aSheet(rows)]);
 
-    expect(movement).toMatchObject({ debit: 12, tag: 'cmd:sword', balance: 88, description: 'Épée' });
+    expect(movement).toMatchObject({
+      debit: 12,
+      tag: 'cmd:sword',
+      balance: 88,
+      description: 'Épée',
+      rowNumber: 4,
+    });
   });
 
   it('stores debits as positive amounts even when the bank exports them as negative numbers', () => {

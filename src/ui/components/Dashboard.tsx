@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { computeSummary } from '../../application/computeSummary';
+import { analyzeRowOrder } from '../../application/rowOrder';
 import {
   compareWithPreviousSchoolYears,
   listSchoolYears,
@@ -15,11 +16,13 @@ import { BalanceTable } from './BalanceTable';
 import { BreakdownSection } from './BreakdownSection';
 import { CommandsSection } from './CommandsSection';
 import { CotisationsSection } from './CotisationsSection';
+import { RowOrderWarning } from './RowOrderWarning';
 import { SchoolYearSelector } from './SchoolYearSelector';
 
 export function Dashboard({ movements }: { movements: Movement[] }) {
   const { t, locale } = useI18n();
   const schoolYears = useMemo(() => listSchoolYears(movements), [movements]);
+  const rowOrder = useMemo(() => analyzeRowOrder(movements), [movements]);
   // The most recent school year is the one usually presented at the meeting.
   const [schoolYear, setSchoolYear] = useState<SchoolYear | null>(schoolYears[0]);
 
@@ -34,6 +37,7 @@ export function Dashboard({ movements }: { movements: Movement[] }) {
 
   return (
     <div className="dashboard">
+      <RowOrderWarning rowOrder={rowOrder} />
       {schoolYears.length > 1 && (
         <SchoolYearSelector schoolYears={schoolYears} selected={schoolYear} onSelect={setSchoolYear} />
       )}

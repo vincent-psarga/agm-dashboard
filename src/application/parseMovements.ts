@@ -78,8 +78,8 @@ export function parseMovements(sheets: Sheet[]): Movement[] {
 
 function readMovements(rows: SheetRows, headerRowIndex: number, indexes: ColumnIndexes): Movement[] {
   const movements: Movement[] = [];
-  for (const row of rows.slice(headerRowIndex + 1)) {
-    const movement = parseRow(row, indexes);
+  for (let index = headerRowIndex + 1; index < rows.length; index++) {
+    const movement = parseRow(rows[index], indexes, index + 1);
     if (movement) movements.push(movement);
   }
   return movements;
@@ -113,7 +113,7 @@ function mapColumns(row: Cell[]): ColumnIndexes {
   return indexes;
 }
 
-function parseRow(row: Cell[], indexes: ColumnIndexes): Movement | null {
+function parseRow(row: Cell[], indexes: ColumnIndexes, rowNumber: number): Movement | null {
   const cell = (column: Column) => (indexes[column] === undefined ? null : row[indexes[column]]);
 
   const date = parseDate(cell('date'));
@@ -127,5 +127,6 @@ function parseRow(row: Cell[], indexes: ColumnIndexes): Movement | null {
     category: parseText(cell('category')),
     tag: parseText(cell('tag')),
     balance: parseAmount(cell('balance')) ?? 0,
+    rowNumber,
   };
 }

@@ -12,6 +12,8 @@
   --positive: #006300;
   --negative: #c13232;
   --error-bg: #fbeaea;
+  --warning-bg: #fff6df;
+  --warning-border: #fab219;
   --radius: 12px;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   line-height: 1.5;
@@ -32,6 +34,8 @@
     --positive: #0ca30c;
     --negative: #e66767;
     --error-bg: #3a1d1d;
+    --warning-bg: #33290f;
+    --warning-border: #8a6408;
   }
 }
 
@@ -196,6 +200,32 @@ button:disabled {
   color: var(--negative);
   padding: 8px 12px;
   border-radius: 8px;
+}
+
+.warning {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.warning summary {
+  cursor: pointer;
+}
+
+.warning-toggle {
+  color: var(--accent);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.warning[open] .warning-toggle {
+  display: none;
+}
+
+.warning .data-table {
+  margin-top: 12px;
 }
 
 .visually-hidden {

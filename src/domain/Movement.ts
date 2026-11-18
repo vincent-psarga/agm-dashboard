@@ -13,4 +13,6 @@ export interface Movement {
   tag: string;
   /** Balance of the account right after this movement. */
   balance: number;
+  /** Line of the movement in the spreadsheet, as shown by Excel (1-based). */
+  rowNumber: number;
 }

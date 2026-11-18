@@ -11,6 +11,7 @@ export function aMovement(overrides: Partial<Omit<Movement, 'date'>> & { date?: 
     category: '',
     tag: '',
     balance: 0,
+    rowNumber: 2,
     ...rest,
   };
 }

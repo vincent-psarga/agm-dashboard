@@ -145,6 +145,52 @@ describe('App', () => {
     });
   });
 
+  describe('when rows are not sorted by date', () => {
+    // Row 3 was typed 2026 instead of 2025.
+    const rowsWithTypo: SheetRows = [
+      ['Date', 'Description', 'Type', 'Débit', 'Crédit', 'Raison', 'Tag', 'Solde'],
+      ['10/08/2025', 'Frais', '', 10, null, 'Frais', null, 490],
+      ['20/08/2026', 'Don', '', null, 150, 'Don', null, 640],
+      ['25/08/2025', 'Location', '', 40, null, 'Location', null, 600],
+      ['02/09/2025', 'Cotisation Alice', '', null, 30, 'Cotisation', null, 630],
+    ];
+
+    it('warns that the balances may be wrong', async () => {
+      renderApp({ rows: rowsWithTypo });
+
+      await uploadFile();
+
+      expect(
+        await screen.findByText('1 row(s) of the file are not at their place.'),
+      ).toBeInTheDocument();
+    });
+
+    it('lists the misplaced rows when clicking on the warning', async () => {
+      renderApp({ rows: rowsWithTypo });
+      await uploadFile();
+
+      const toggle = await screen.findByText('Show the rows');
+      await userEvent.click(toggle);
+
+      const warning = toggle.closest('details')!;
+      expect(warning).toHaveAttribute('open');
+      const rows = within(warning).getAllByRole('row');
+      expect(rows.map((row) => row.textContent)).toEqual([
+        'RowDateDescriptionAmountDate of the row aboveDate of the row below',
+        '320/08/2026Don+€150.0010/08/202525/08/2025',
+      ]);
+    });
+  });
+
+  it('does not warn about the rows order when the file is sorted', async () => {
+    renderApp();
+
+    await uploadFile();
+
+    await screen.findByRole('heading', { name: 'School year 2024-2025' });
+    expect(screen.queryByText(/not at their place/)).not.toBeInTheDocument();
+  });
+
   it('does not offer to select a school year when the file covers only one', async () => {
     renderApp();
 
