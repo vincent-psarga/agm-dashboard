@@ -46,6 +46,9 @@ const movements = [
   ['2025-08-31', 'Frais bancaires', 'Prélèvement', 12, 0, 'Frais bancaires', ''],
 ];
 
+// Rows sorted from the oldest to the most recent, as in the association's files.
+movements.sort(([a], [b]) => a.localeCompare(b));
+
 let balance = 1150;
 const rows = movements.map(([date, description, type, debit, credit, category, tag]) => {
   balance = Math.round((balance - debit + credit) * 100) / 100;
@@ -60,9 +63,6 @@ const rows = movements.map(([date, description, type, debit, credit, category, t
     balance,
   ];
 });
-
-// Bank exports usually list the most recent movement first.
-rows.reverse();
 
 const output = new URL('../public/sample-movements.xlsx', import.meta.url).pathname;
 // Real exports may hold other sheets before the movements: the app must find the right one.
