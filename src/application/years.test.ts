@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { yearLabel, yearOf } from '../domain/Year';
 import type { Year } from '../domain/Year';
 import { aMovement } from '../test/movementFactory';
-import { compareWithPreviousYears, listYears, movementsOfYear } from './years';
+import { compareWithPreviousYears, cotisationsByYear, listYears, movementsOfYear } from './years';
 
 const utc = (iso: string) => new Date(`${iso}T00:00:00Z`);
 const school = (startYear: number): Year => ({ kind: 'school', startYear });
@@ -165,5 +165,42 @@ describe('compareWithPreviousYears', () => {
     const years = compareWithPreviousYears(movements, school(2021));
 
     expect(years.map(({ year }) => year.startYear)).toEqual([2021]);
+  });
+});
+
+describe('cotisationsByYear', () => {
+  const aCotisation = (date: string, description: string, credit: number) =>
+    aMovement({ date, description, credit, category: 'Cotisation' });
+
+  const movements = [
+    aCotisation('2023-09-15', 'Cotisation Zoé', 25),
+    aMovement({ date: '2024-03-10', debit: 200, category: 'Assurance' }),
+    aCotisation('2024-09-12', 'Cotisation Bob', 30),
+    aCotisation('2024-09-10', 'Cotisation Alice', 30),
+    aMovement({ date: '2025-10-01', debit: 80, category: 'Location' }),
+  ];
+
+  it('gives the fees paid each school year, from the oldest year to the most recent', () => {
+    const years = cotisationsByYear(movements, 'school');
+
+    expect(years.map(({ year }) => yearLabel(year))).toEqual(['2023-2024', '2024-2025', '2025-2026']);
+    expect(years.map(({ cotisations }) => cotisations.length)).toEqual([1, 2, 0]);
+    expect(years.map(({ total }) => total)).toEqual([25, 60, 0]);
+  });
+
+  it('lists the members of a year by payment date', () => {
+    const [, schoolYear2024] = cotisationsByYear(movements, 'school');
+
+    expect(schoolYear2024.cotisations).toEqual([
+      { memberName: 'Alice', date: utc('2024-09-10'), amount: 30 },
+      { memberName: 'Bob', date: utc('2024-09-12'), amount: 30 },
+    ]);
+  });
+
+  it('gives the fees paid each calendar year', () => {
+    const years = cotisationsByYear(movements, 'calendar');
+
+    expect(years.map(({ year }) => yearLabel(year))).toEqual(['2023', '2024', '2025']);
+    expect(years.map(({ total }) => total)).toEqual([25, 60, 0]);
   });
 });

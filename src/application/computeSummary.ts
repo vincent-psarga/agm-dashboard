@@ -30,7 +30,7 @@ export function computeSummary(
   if (movements.length === 0) throw new Error('Cannot summarize an empty list of movements');
 
   const ordered = orderChronologically(movements, mostRecentFirst);
-  const cotisations = ordered.filter(isCotisation).map(toCotisation);
+  const cotisations = cotisationsOf(ordered);
 
   return {
     period: { start: ordered[0].date, end: ordered[ordered.length - 1].date },
@@ -75,6 +75,11 @@ export function orderChronologically(
 ): Movement[] {
   const fileOrder = mostRecentFirst ? [...movements].reverse() : [...movements];
   return fileOrder.sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+/** The membership fees paid in the given movements, in the same order. */
+export function cotisationsOf(movements: Movement[]): Cotisation[] {
+  return movements.filter(isCotisation).map(toCotisation);
 }
 
 function isCotisation(movement: Movement): boolean {

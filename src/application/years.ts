@@ -1,7 +1,8 @@
 import type { Movement } from '../domain/Movement';
 import { yearOf } from '../domain/Year';
+import type { YearCotisations } from '../domain/FinancialSummary';
 import type { Year, YearBalance, YearKind } from '../domain/Year';
-import { balancesOf } from './computeSummary';
+import { balancesOf, cotisationsOf, orderChronologically } from './computeSummary';
 import { analyzeRowOrder } from './rowOrder';
 
 /** The years of the given kind covered by the movements, from the most recent to the oldest. */
@@ -53,4 +54,24 @@ export function compareWithPreviousYears(
   }
 
   return balances.slice(-(previousYearsCount + 1));
+}
+
+/**
+ * The membership fees paid each year of the file, from the oldest year to the most recent,
+ * to see how the number of members evolved. Years without any fee are kept, with none.
+ */
+export function cotisationsByYear(
+  movements: Movement[],
+  kind: YearKind,
+  mostRecentFirst = analyzeRowOrder(movements).mostRecentFirst,
+): YearCotisations[] {
+  return listYears(movements, kind)
+    .reverse()
+    .map((year) => {
+      const cotisations = cotisationsOf(
+        orderChronologically(movementsOfYear(movements, year), mostRecentFirst),
+      );
+      const total = cotisations.reduce((sum, cotisation) => sum + cotisation.amount, 0);
+      return { year, cotisations, total: Math.round(total * 100) / 100 };
+    });
 }

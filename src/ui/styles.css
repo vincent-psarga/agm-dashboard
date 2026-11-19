@@ -373,6 +373,10 @@ button:disabled {
   content: '▾';
 }
 
+.toggle-placeholder {
+  padding-left: 1em;
+}
+
 .category-movements > td {
   padding: 0 0 8px 1em;
 }
@@ -433,6 +437,10 @@ button:disabled {
 
   .category-toggle::before {
     display: none;
+  }
+
+  .toggle-placeholder {
+    padding-left: 0;
   }
 
   /* Details and chart side by side, to save paper. */

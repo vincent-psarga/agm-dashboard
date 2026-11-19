@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { computeSummary } from '../../application/computeSummary';
 import { analyzeRowOrder } from '../../application/rowOrder';
-import { compareWithPreviousYears, listYears, movementsOfYear } from '../../application/years';
+import { compareWithPreviousYears, cotisationsByYear, listYears, movementsOfYear } from '../../application/years';
 import type { Movement } from '../../domain/Movement';
 import { yearLabel } from '../../domain/Year';
 import type { Year, YearKind } from '../../domain/Year';
@@ -11,6 +11,7 @@ import { BalanceComparisonTable } from './BalanceComparisonTable';
 import { BalanceTable } from './BalanceTable';
 import { BreakdownSection } from './BreakdownSection';
 import { TagGroupsSection } from './TagGroupsSection';
+import { CotisationsByYearSection } from './CotisationsByYearSection';
 import { CotisationsSection } from './CotisationsSection';
 import { RowOrderWarning } from './RowOrderWarning';
 import { YearSelector } from './YearSelector';
@@ -71,7 +72,14 @@ export function Dashboard({ movements }: { movements: Movement[] }) {
       ) : (
         <BalanceTable summary={summary} />
       )}
-      <CotisationsSection cotisations={summary.cotisations} total={summary.cotisationsTotal} />
+      {year ? (
+        <CotisationsSection cotisations={summary.cotisations} total={summary.cotisationsTotal} />
+      ) : (
+        // Listing every member of several years makes no sense: a summary per year instead.
+        <CotisationsByYearSection
+          years={cotisationsByYear(movements, kind, rowOrder.mostRecentFirst)}
+        />
+      )}
       <BreakdownSection id="expenses" title={t('expensesTitle')} breakdown={summary.expenses} />
       <BreakdownSection id="incomes" title={t('incomesTitle')} breakdown={summary.incomes} />
       <TagGroupsSection id="commands" title={t('commandsTitle')} groups={summary.groupedCommands} />

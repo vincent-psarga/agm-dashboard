@@ -214,6 +214,51 @@ describe('App', () => {
       const balance = screen.getByRole('region', { name: 'Account balance' });
       expect(within(balance).getByRole('row', { name: /Balance on 15 September 2023/ })).toHaveTextContent('€500.00');
     });
+
+    it('sums up the membership fees of each year of the whole period', async () => {
+      renderApp({ rows: TWO_YEARS_ROWS });
+      await uploadFile();
+
+      await userEvent.selectOptions(await screen.findByLabelText('Select year'), 'Whole period');
+
+      const cotisations = screen.getByRole('region', { name: 'Membership fees' });
+      expect(within(cotisations).getAllByRole('row').map((row) => row.textContent)).toEqual([
+        'YearPaying membersTotal fees',
+        '2023-20241€25.00',
+        '2024-20251€30.00',
+        'Total2€55.00',
+      ]);
+      expect(within(cotisations).queryByText('Alice')).not.toBeInTheDocument();
+    });
+
+    it('lists the members who paid during a year of the whole period when clicking on it', async () => {
+      renderApp({ rows: TWO_YEARS_ROWS });
+      await uploadFile();
+      await userEvent.selectOptions(await screen.findByLabelText('Select year'), 'Whole period');
+
+      await userEvent.click(screen.getByRole('button', { name: '2024-2025' }));
+
+      const members = screen.getByRole('table', { name: 'Members who paid in 2024-2025' });
+      expect(within(members).getByRole('row')).toHaveTextContent('15/09/2024Alice');
+      expect(screen.getByRole('button', { name: '2024-2025' })).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('sums up the membership fees per calendar year when calendar years are chosen', async () => {
+      renderApp({ rows: TWO_YEARS_ROWS });
+      await uploadFile();
+      await userEvent.click(await screen.findByRole('button', { name: 'Calendar' }));
+
+      await userEvent.selectOptions(screen.getByLabelText('Select year'), 'Whole period');
+
+      const cotisations = screen.getByRole('region', { name: 'Membership fees' });
+      expect(within(cotisations).getAllByRole('row').map((row) => row.textContent)).toEqual([
+        'YearPaying membersTotal fees',
+        '20231€25.00',
+        '20241€30.00',
+        '20250€0.00',
+        'Total2€55.00',
+      ]);
+    });
   });
 
   describe('when choosing calendar years', () => {

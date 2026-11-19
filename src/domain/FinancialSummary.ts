@@ -1,3 +1,5 @@
+import type { Year } from './Year';
+
 export interface Period {
   start: Date;
   end: Date;
@@ -37,6 +39,14 @@ export interface Cotisation {
   memberName: string;
   date: Date;
   amount: number;
+}
+
+/** The membership fees paid during a year. */
+export interface YearCotisations {
+  year: Year;
+  /** From the oldest to the most recent. */
+  cotisations: Cotisation[];
+  total: number;
 }
 
 /**
