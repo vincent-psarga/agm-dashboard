@@ -183,9 +183,15 @@ describe('cotisationsByYear', () => {
   it('gives the fees paid each school year, from the oldest year to the most recent', () => {
     const years = cotisationsByYear(movements, 'school');
 
-    expect(years.map(({ year }) => yearLabel(year))).toEqual(['2023-2024', '2024-2025', '2025-2026']);
-    expect(years.map(({ cotisations }) => cotisations.length)).toEqual([1, 2, 0]);
-    expect(years.map(({ total }) => total)).toEqual([25, 60, 0]);
+    expect(years.map(({ year }) => yearLabel(year))).toEqual(['2023-2024', '2024-2025']);
+    expect(years.map(({ cotisations }) => cotisations.length)).toEqual([1, 2]);
+    expect(years.map(({ total }) => total)).toEqual([25, 60]);
+  });
+
+  it('leaves out the years without any fee', () => {
+    const years = cotisationsByYear(movements, 'school');
+
+    expect(years.map(({ year }) => yearLabel(year))).not.toContain('2025-2026');
   });
 
   it('lists the members of a year by payment date', () => {
@@ -200,7 +206,7 @@ describe('cotisationsByYear', () => {
   it('gives the fees paid each calendar year', () => {
     const years = cotisationsByYear(movements, 'calendar');
 
-    expect(years.map(({ year }) => yearLabel(year))).toEqual(['2023', '2024', '2025']);
-    expect(years.map(({ total }) => total)).toEqual([25, 60, 0]);
+    expect(years.map(({ year }) => yearLabel(year))).toEqual(['2023', '2024']);
+    expect(years.map(({ total }) => total)).toEqual([25, 60]);
   });
 });

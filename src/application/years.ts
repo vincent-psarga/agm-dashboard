@@ -58,7 +58,7 @@ export function compareWithPreviousYears(
 
 /**
  * The membership fees paid each year of the file, from the oldest year to the most recent,
- * to see how the number of members evolved. Years without any fee are kept, with none.
+ * to see how the number of members evolved. Years without any fee are left out.
  */
 export function cotisationsByYear(
   movements: Movement[],
@@ -73,5 +73,6 @@ export function cotisationsByYear(
       );
       const total = cotisations.reduce((sum, cotisation) => sum + cotisation.amount, 0);
       return { year, cotisations, total: Math.round(total * 100) / 100 };
-    });
+    })
+    .filter(({ cotisations }) => cotisations.length > 0);
 }

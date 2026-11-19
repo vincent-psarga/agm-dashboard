@@ -12,7 +12,7 @@ export function CotisationsByYearSection({ years }: { years: YearCotisations[] }
   const { t, locale } = useI18n();
 
   // Nothing to show: no empty section in the report.
-  if (years.every(({ cotisations }) => cotisations.length === 0)) return null;
+  if (years.length === 0) return null;
 
   const count = years.reduce((sum, { cotisations }) => sum + cotisations.length, 0);
   const total = years.reduce((sum, year) => sum + year.total, 0);
@@ -58,19 +58,14 @@ function YearRows({ yearCotisations: { year, cotisations, total } }: { yearCotis
     <Fragment>
       <tr>
         <td>
-          {cotisations.length > 0 ? (
-            <button
-              type="button"
-              className="category-toggle"
-              aria-expanded={isOpen}
-              onClick={() => setIsOpen((open) => !open)}
-            >
-              {label}
-            </button>
-          ) : (
-            // Aligned with the years that can be opened.
-            <span className="toggle-placeholder">{label}</span>
-          )}
+          <button
+            type="button"
+            className="category-toggle"
+            aria-expanded={isOpen}
+            onClick={() => setIsOpen((open) => !open)}
+          >
+            {label}
+          </button>
         </td>
         <td className="amount">{cotisations.length}</td>
         <td className="amount">{formatAmount(total, locale)}</td>

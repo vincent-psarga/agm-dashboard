@@ -243,7 +243,7 @@ describe('App', () => {
       expect(screen.getByRole('button', { name: '2024-2025' })).toHaveAttribute('aria-expanded', 'true');
     });
 
-    it('sums up the membership fees per calendar year when calendar years are chosen', async () => {
+    it('sums up the membership fees per calendar year, without the years with no fee', async () => {
       renderApp({ rows: TWO_YEARS_ROWS });
       await uploadFile();
       await userEvent.click(await screen.findByRole('button', { name: 'Calendar' }));
@@ -255,7 +255,6 @@ describe('App', () => {
         'YearPaying membersTotal fees',
         '20231€25.00',
         '20241€30.00',
-        '20250€0.00',
         'Total2€55.00',
       ]);
     });
