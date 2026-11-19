@@ -17,7 +17,7 @@ When the file has several sheets, the first one with these columns is used:
 | Débit       | money leaving the account                                    |
 | Crédit      | money received on the account                                |
 | Raison      | category; `cotisation` rows are listed as membership fees    |
-| Tag         | `cmd:<key>` groups the row in the "grouped orders" section   |
+| Tag         | `cmd:<key>` groups the row in the "grouped orders" section, `presta:<place>` in the "prestations" one |
 | Solde       | balance after the movement, used for the initial/final balance |
 
 When the file covers several years, a selector lets you pick the year to present: school years

@@ -114,6 +114,32 @@ describe('App', () => {
     expect(within(expenses).queryByRole('table', { name: /Movements of/ })).not.toBeInTheDocument();
   });
 
+  it('shows the prestations, grouped by place', async () => {
+    renderApp({
+      rows: [
+        ...ROWS,
+        ['21/06/2025', 'Spectacle château', '', null, 450, 'Presta', 'presta:chateau-montby', 350],
+        ['22/06/2025', 'Location van', '', 80, null, 'Presta', 'presta:chateau-montby', 270],
+      ],
+    });
+
+    await uploadFile();
+
+    const prestations = await screen.findByRole('region', { name: 'Shows and visits' });
+    expect(within(prestations).getByRole('article', { name: 'chateau-montby' })).toHaveTextContent(
+      'Difference: +€370.00',
+    );
+  });
+
+  it('does not show the prestations section when no movement is tagged "presta:..."', async () => {
+    renderApp();
+
+    await uploadFile();
+
+    expect(await screen.findByRole('region', { name: 'Expenses' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Shows and visits' })).not.toBeInTheDocument();
+  });
+
   it('does not show the grouped orders section when no movement is tagged "cmd:..."', async () => {
     renderApp({ rows: ROWS.map((row) => row.map((cell) => (cell === 'cmd:sword' ? null : cell))) });
 

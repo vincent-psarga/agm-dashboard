@@ -1,41 +1,51 @@
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, XAxis, YAxis } from 'recharts';
-import type { GroupedCommand } from '../../domain/FinancialSummary';
+import type { TagGroup } from '../../domain/FinancialSummary';
 import { useChartPalette } from '../charts/palette';
 import { formatAmount, formatSignedAmount } from '../format';
 import { useI18n } from '../i18n/I18nProvider';
 
-export function CommandsSection({ commands }: { commands: GroupedCommand[] }) {
-  const { t } = useI18n();
-  // All the charts share the same scale so that the orders can be compared.
-  const maxAmount = Math.max(0, ...commands.flatMap((command) => [command.expenses, command.incomes]));
+interface Props {
+  id: string;
+  title: string;
+  groups: TagGroup[];
+}
 
-  // Not every association runs grouped orders: the section is only shown when there are some.
-  if (commands.length === 0) return null;
+/**
+ * Expenses and incomes of the movements sharing a tag (grouped orders, prestations...),
+ * with one small chart per tag key.
+ */
+export function TagGroupsSection({ id, title, groups }: Props) {
+  // All the charts share the same scale so that they can be compared.
+  const maxAmount = Math.max(0, ...groups.flatMap((group) => [group.expenses, group.incomes]));
 
+  // The section is only shown when some movements have the tag.
+  if (groups.length === 0) return null;
+
+  const titleId = `${id}-title`;
   return (
-    <section className="card" aria-labelledby="commands-title">
-      <h2 id="commands-title">{t('commandsTitle')}</h2>
-      <div className="commands">
-        {commands.map((command) => (
-          <CommandChart key={command.key} command={command} maxAmount={maxAmount} />
+    <section className="card" aria-labelledby={titleId}>
+      <h2 id={titleId}>{title}</h2>
+      <div className="tag-groups">
+        {groups.map((group) => (
+          <TagGroupChart key={group.key} group={group} maxAmount={maxAmount} />
         ))}
       </div>
     </section>
   );
 }
 
-function CommandChart({ command, maxAmount }: { command: GroupedCommand; maxAmount: number }) {
+function TagGroupChart({ group, maxAmount }: { group: TagGroup; maxAmount: number }) {
   const { t, locale } = useI18n();
   const palette = useChartPalette();
 
   const bars = [
-    { name: t('commandExpenses'), value: command.expenses, color: palette.expense },
-    { name: t('commandIncomes'), value: command.incomes, color: palette.income },
+    { name: t('commandExpenses'), value: group.expenses, color: palette.expense },
+    { name: t('commandIncomes'), value: group.incomes, color: palette.income },
   ];
 
   return (
-    <article className="command" aria-label={command.key}>
-      <h3>{command.key}</h3>
+    <article className="tag-group" aria-label={group.key}>
+      <h3>{group.key}</h3>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={bars} margin={{ top: 24, right: 8, bottom: 0, left: 8 }} barCategoryGap="20%">
           <XAxis
@@ -59,10 +69,10 @@ function CommandChart({ command, maxAmount }: { command: GroupedCommand; maxAmou
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-      <p className="command-difference">
+      <p className="tag-group-difference">
         {t('commandDifference')}{' '}
-        <strong className={command.difference < 0 ? 'negative' : 'positive'}>
-          {formatSignedAmount(command.difference, locale)}
+        <strong className={group.difference < 0 ? 'negative' : 'positive'}>
+          {formatSignedAmount(group.difference, locale)}
         </strong>
       </p>
     </article>

@@ -5,7 +5,7 @@ import type {
   Cotisation,
   ChartSlice,
   FinancialSummary,
-  GroupedCommand,
+  TagGroup,
 } from '../domain/FinancialSummary';
 import type { Movement } from '../domain/Movement';
 import { normalizeText } from './cellParsers';
@@ -16,6 +16,7 @@ export const NAMED_SLICES_COUNT = 5;
 
 const COTISATION_CATEGORIES = ['cotisation', 'cotisations'];
 const COMMAND_TAG_PREFIX = 'cmd:';
+const PRESTATION_TAG_PREFIX = 'presta:';
 
 /**
  * @param mostRecentFirst order of the rows in the whole file: it must be given when the
@@ -38,7 +39,8 @@ export function computeSummary(
     cotisationsTotal: sum(cotisations.map((cotisation) => cotisation.amount)),
     expenses: breakdown(ordered, (movement) => movement.debit),
     incomes: breakdown(ordered, (movement) => movement.credit),
-    groupedCommands: groupCommands(ordered),
+    groupedCommands: groupByTag(ordered, COMMAND_TAG_PREFIX),
+    prestations: groupByTag(ordered, PRESTATION_TAG_PREFIX),
   };
 }
 
@@ -130,19 +132,20 @@ function toSlices(categories: CategoryBreakdown['categories']): ChartSlice[] {
   return [...named, { category: null, amount: sum(others.map((category) => category.amount)) }];
 }
 
-export function groupCommands(movements: Movement[]): GroupedCommand[] {
-  const commands = new Map<string, { expenses: number; incomes: number }>();
+/** Groups the movements tagged "<prefix><key>" by key, e.g. "cmd:sword" -> "sword". */
+export function groupByTag(movements: Movement[], prefix: string): TagGroup[] {
+  const groups = new Map<string, { expenses: number; incomes: number }>();
 
   for (const movement of movements) {
-    for (const key of commandKeys(movement.tag)) {
-      const command = commands.get(key) ?? { expenses: 0, incomes: 0 };
-      command.expenses += movement.debit;
-      command.incomes += movement.credit;
-      commands.set(key, command);
+    for (const key of tagKeys(movement.tag, prefix)) {
+      const group = groups.get(key) ?? { expenses: 0, incomes: 0 };
+      group.expenses += movement.debit;
+      group.incomes += movement.credit;
+      groups.set(key, group);
     }
   }
 
-  return [...commands.entries()]
+  return [...groups.entries()]
     .map(([key, { expenses, incomes }]) => ({
       key,
       expenses: roundCents(expenses),
@@ -152,12 +155,12 @@ export function groupCommands(movements: Movement[]): GroupedCommand[] {
     .sort((a, b) => a.key.localeCompare(b.key));
 }
 
-/** Extracts the command keys from a tag cell, e.g. "cmd:sword" -> ["sword"]. */
-function commandKeys(tag: string): string[] {
+/** Extracts the keys of a prefix from a tag cell, e.g. "cmd:sword" -> ["sword"]. */
+function tagKeys(tag: string, prefix: string): string[] {
   const keys = tag
     .split(/[\s,;]+/)
-    .filter((part) => part.toLowerCase().startsWith(COMMAND_TAG_PREFIX))
-    .map((part) => part.slice(COMMAND_TAG_PREFIX.length).trim())
+    .filter((part) => part.toLowerCase().startsWith(prefix))
+    .map((part) => part.slice(prefix.length).trim())
     .filter((key) => key !== '');
   return [...new Set(keys)];
 }

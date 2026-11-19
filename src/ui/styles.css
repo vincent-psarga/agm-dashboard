@@ -395,19 +395,19 @@ button:disabled {
 
 /* Grouped commands */
 
-.commands {
+.tag-groups {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
 }
 
-.command {
+.tag-group {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px;
 }
 
-.command-difference {
+.tag-group-difference {
   margin: 8px 0 0;
   text-align: center;
 }

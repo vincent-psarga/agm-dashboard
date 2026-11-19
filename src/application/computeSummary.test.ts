@@ -167,4 +167,30 @@ describe('computeSummary', () => {
       ]);
     });
   });
+
+  describe('prestations', () => {
+    it('groups the movements tagged "presta:<place>" by place', () => {
+      const summary = computeSummary([
+        aMovement({ tag: 'presta:chateau-montby', debit: 80 }),
+        aMovement({ tag: 'presta:chateau-montby', credit: 450 }),
+        aMovement({ tag: 'presta:ecole-jules-ferry', credit: 200 }),
+        aMovement({ tag: 'cmd:sword', debit: 999 }),
+      ]);
+
+      expect(summary.prestations).toEqual([
+        { key: 'chateau-montby', expenses: 80, incomes: 450, difference: 370 },
+        { key: 'ecole-jules-ferry', expenses: 0, incomes: 200, difference: 200 },
+      ]);
+      expect(summary.groupedCommands.map((group) => group.key)).toEqual(['sword']);
+    });
+
+    it('counts a movement in both a grouped order and a prestation when it has both tags', () => {
+      const summary = computeSummary([aMovement({ tag: 'cmd:sword presta:chateau-montby', debit: 30 })]);
+
+      expect(summary.groupedCommands).toEqual([{ key: 'sword', expenses: 30, incomes: 0, difference: -30 }]);
+      expect(summary.prestations).toEqual([
+        { key: 'chateau-montby', expenses: 30, incomes: 0, difference: -30 },
+      ]);
+    });
+  });
 });

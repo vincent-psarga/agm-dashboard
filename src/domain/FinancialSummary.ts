@@ -39,7 +39,11 @@ export interface Cotisation {
   amount: number;
 }
 
-export interface GroupedCommand {
+/**
+ * Movements sharing a tag "<prefix>:<key>", e.g. "cmd:sword" for a grouped order or
+ * "presta:chateau-montby" for a prestation.
+ */
+export interface TagGroup {
   key: string;
   expenses: number;
   incomes: number;
@@ -55,5 +59,8 @@ export interface FinancialSummary {
   cotisationsTotal: number;
   expenses: CategoryBreakdown;
   incomes: CategoryBreakdown;
-  groupedCommands: GroupedCommand[];
+  /** Movements tagged "cmd:<key>". */
+  groupedCommands: TagGroup[];
+  /** Movements tagged "presta:<place>". */
+  prestations: TagGroup[];
 }

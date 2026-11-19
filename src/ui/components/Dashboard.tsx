@@ -10,7 +10,7 @@ import { formatDate } from '../format';
 import { BalanceComparisonTable } from './BalanceComparisonTable';
 import { BalanceTable } from './BalanceTable';
 import { BreakdownSection } from './BreakdownSection';
-import { CommandsSection } from './CommandsSection';
+import { TagGroupsSection } from './TagGroupsSection';
 import { CotisationsSection } from './CotisationsSection';
 import { RowOrderWarning } from './RowOrderWarning';
 import { YearSelector } from './YearSelector';
@@ -74,7 +74,8 @@ export function Dashboard({ movements }: { movements: Movement[] }) {
       <CotisationsSection cotisations={summary.cotisations} total={summary.cotisationsTotal} />
       <BreakdownSection id="expenses" title={t('expensesTitle')} breakdown={summary.expenses} />
       <BreakdownSection id="incomes" title={t('incomesTitle')} breakdown={summary.incomes} />
-      <CommandsSection commands={summary.groupedCommands} />
+      <TagGroupsSection id="commands" title={t('commandsTitle')} groups={summary.groupedCommands} />
+      <TagGroupsSection id="prestations" title={t('prestationsTitle')} groups={summary.prestations} />
     </div>
   );
 }
