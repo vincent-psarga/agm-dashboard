@@ -131,6 +131,23 @@ describe('App', () => {
     );
   });
 
+  it('does not show the sections with nothing to show', async () => {
+    // Only expenses: no membership fee, no income.
+    renderApp({
+      rows: [
+        ['Date', 'Description', 'Type', 'Débit', 'Crédit', 'Raison', 'Tag', 'Solde'],
+        ['05/01/2025', 'Location salle', '', 80, null, 'Location', null, 20],
+      ],
+    });
+
+    await uploadFile();
+
+    expect(await screen.findByRole('region', { name: 'Expenses' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Account balance' })).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Membership fees' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Incomes' })).not.toBeInTheDocument();
+  });
+
   it('does not show the prestations section when no movement is tagged "presta:..."', async () => {
     renderApp();
 

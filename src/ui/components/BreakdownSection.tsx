@@ -18,14 +18,8 @@ export function BreakdownSection({ id, title, breakdown }: Props) {
   const categoryName = (category: string | null) =>
     category === null ? t('others') : category || t('uncategorized');
 
-  if (breakdown.categories.length === 0) {
-    return (
-      <section className="card" aria-labelledby={titleId}>
-        <h2 id={titleId}>{title}</h2>
-        <p className="muted">{t('breakdownEmpty')}</p>
-      </section>
-    );
-  }
+  // Nothing to show: no empty section in the report.
+  if (breakdown.categories.length === 0) return null;
 
   const slices = breakdown.slices.map((slice, index) => ({
     name: categoryName(slice.category),
